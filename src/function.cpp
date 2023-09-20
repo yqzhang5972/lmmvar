@@ -37,25 +37,25 @@ double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen
   int p = X.cols();
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
 
-  Eigen::MatrixXd V2X = (X.array().colwise() * V2dg_inv).matrix();
-  Eigen::MatrixXd XV2X = crossProd(X, V2X);
-  Eigen::MatrixXd XV2X_inv = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p));
+  //Eigen::MatrixXd V2X = (X.array().colwise() * V2dg_inv).matrix(); // It looks like we do not need to store this
+  Eigen::MatrixXd XV2X = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()); // It looks like we do not need to store this matrix
+  XV2X = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p)); // Is there a way to void this inverse?
 
-  Eigen::MatrixXd betahat = XV2X_inv * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd betahat = XV2X * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
-  double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n-p);
+  double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
-  Eigen::ArrayXd V1dg = s2phat * (lambda.array()-1);
-  Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_inv).array());
+  Eigen::ArrayXd V1dg = s2phat * (lambda.array() - 1);
+  Eigen::VectorXd diagH = rowSum(X.array() * (X* XV2X).array());
   Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
   Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
 
   double I_hh = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
   double I_hp = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
   double I_pp = 0.5 * pow(s2phat,-2) * (n - diagH_V2.sum());
-  double Iinv_hh = 1 / (I_hh - pow(I_hp,2)/I_pp);
+  double Iinv_hh = 1 / (I_hh - pow(I_hp,2) / I_pp);
 
-  double score_h = 0.5 * pow(s2phat,-1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
+  double score_h = 0.5 * pow(s2phat, -1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
   double test = Iinv_hh * pow(score_h, 2);
   return test;
 }
@@ -88,12 +88,11 @@ double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eige
 
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
 
-  Eigen::MatrixXd V2X = (X.array().colwise() * V2dg_inv).matrix();
-  Eigen::MatrixXd XV2X = crossProd(X, V2X);
-  Eigen::MatrixXd XV2X_inv = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p));
+  Eigen::MatrixXd XV2X = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()); // It looks like this is never used after the next line, so let's not store it
+  XV2X = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p)); // Can we avoid this inverse?
 
-  Eigen::ArrayXd V1dg = s2p * (lambda.array()-1);
-  Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_inv).array());
+  Eigen::ArrayXd V1dg = s2p * (lambda.array() - 1);
+  Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X).array());
   Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
   Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
 
@@ -102,9 +101,9 @@ double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eige
   double I_pp = 0.5 * pow(s2p,-2) * (n - diagH_V2.sum());
   Eigen::MatrixXd I(2,2);
   I << I_hh, I_hp, I_hp, I_pp;
-  Eigen::MatrixXd Iinv = I.inverse();
+  Eigen::MatrixXd Iinv = I.inverse(); // Can we avoid this?
 
-  Eigen::MatrixXd betahat = XV2X_inv * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd betahat = XV2X * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
 
   double score_h = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
@@ -204,7 +203,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eige
 //'
 //' @description {
 //' for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
-//' h2 is the proportion of variation of indepedent random component versus the total variation,
+//' h2 is the proportion of variation of independent random component versus the total variation,
 //' assuming the covariance matrix corresponding to the random component is diagonal (see details).
 //' }
 //' @param range_h A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).
