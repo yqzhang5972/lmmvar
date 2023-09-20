@@ -1,6 +1,6 @@
 Package: lmmvar
 Type: Package
-Title: Score test on proportion of variation in a linear mixed model.
+Title: Score test on proportion of variation in a linear mixed model
 Version: 1.0
 Date: 2023-09-19
 Author: Who wrote it
