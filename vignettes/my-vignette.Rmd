@@ -25,7 +25,7 @@ where $u_{m\times1} \sim N(0, \frac{\sigma_g^2}{m})$, $e_{n\times1} \sim N(0, \s
 $$y \sim N(X\beta, \sigma_g^2K+\sigma_e^2I_n)$$
 with $K = \frac{ZZ^T}{m}$.
 
-
+# simulation
 ```{r}
 # simulate y = X\beta + Zu + e
 simData <- function(sigma2_g, sigma2_e = 1, X, Z) {  
@@ -76,6 +76,9 @@ ynew = crossprod(V, y)
 ```
 
 ```{r}
-
+varRatioTest1d(h2, ynew, Xnew, lambda) 
+varRatioTest2d(h2, s2p, ynew, Xnew, lambda) 
+confInv(c(1e-4,1-1e-4), ynew, Xnew, lambda)
+confReg(c(1e-4,1-1e-4), c(1e-4,3), ynew, Xnew, lambda)
 ```
 
