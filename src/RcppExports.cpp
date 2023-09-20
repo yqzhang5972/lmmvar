@@ -11,73 +11,73 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// varRatioTest1d
-double varRatioTest1d(double h2, Map<MatrixXd> X, Map<MatrixXd> y, Map<MatrixXd> lambda);
-RcppExport SEXP _lmmvar_varRatioTest1d(SEXP h2SEXP, SEXP XSEXP, SEXP ySEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(varRatioTest1d(h2, X, y, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 // confInv
-Rcpp::NumericVector confInv(Map<VectorXd> range_h, Map<MatrixXd> y, Map<MatrixXd> X, Map<MatrixXd> lambda, double tolerance, double confLevel);
+Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda, double tolerance, double confLevel);
 RcppExport SEXP _lmmvar_confInv(SEXP range_hSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP, SEXP toleranceSEXP, SEXP confLevelSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Map<VectorXd> >::type range_h(range_hSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type range_h(range_hSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< double >::type tolerance(toleranceSEXP);
     Rcpp::traits::input_parameter< double >::type confLevel(confLevelSEXP);
     rcpp_result_gen = Rcpp::wrap(confInv(range_h, y, X, lambda, tolerance, confLevel));
     return rcpp_result_gen;
 END_RCPP
 }
-// varRatioTest2d
-double varRatioTest2d(double h2, double s2p, Map<MatrixXd> X, Map<MatrixXd> y, Map<MatrixXd> lambda);
-RcppExport SEXP _lmmvar_varRatioTest2d(SEXP h2SEXP, SEXP s2pSEXP, SEXP XSEXP, SEXP ySEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
-    Rcpp::traits::input_parameter< double >::type s2p(s2pSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(varRatioTest2d(h2, s2p, X, y, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 // confReg
-MatrixXd confReg(Map<VectorXd> range_h, Map<VectorXd> range_p, Map<MatrixXd> y, Map<MatrixXd> X, Map<MatrixXd> lambda, int grid);
+Eigen::MatrixXd confReg(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eigen::VectorXd> range_p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda, int grid);
 RcppExport SEXP _lmmvar_confReg(SEXP range_hSEXP, SEXP range_pSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP, SEXP gridSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< Map<VectorXd> >::type range_h(range_hSEXP);
-    Rcpp::traits::input_parameter< Map<VectorXd> >::type range_p(range_pSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Map<MatrixXd> >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type range_h(range_hSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::VectorXd> >::type range_p(range_pSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< int >::type grid(gridSEXP);
     rcpp_result_gen = Rcpp::wrap(confReg(range_h, range_p, y, X, lambda, grid));
     return rcpp_result_gen;
 END_RCPP
 }
+// varRatioTest1d
+double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
+RcppExport SEXP _lmmvar_varRatioTest1d(SEXP h2SEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(varRatioTest1d(h2, y, X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// varRatioTest2d
+double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
+RcppExport SEXP _lmmvar_varRatioTest2d(SEXP h2SEXP, SEXP s2pSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
+    Rcpp::traits::input_parameter< double >::type s2p(s2pSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(varRatioTest2d(h2, s2p, y, X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lmmvar_varRatioTest1d", (DL_FUNC) &_lmmvar_varRatioTest1d, 4},
     {"_lmmvar_confInv", (DL_FUNC) &_lmmvar_confInv, 6},
-    {"_lmmvar_varRatioTest2d", (DL_FUNC) &_lmmvar_varRatioTest2d, 5},
     {"_lmmvar_confReg", (DL_FUNC) &_lmmvar_confReg, 6},
+    {"_lmmvar_varRatioTest1d", (DL_FUNC) &_lmmvar_varRatioTest1d, 4},
+    {"_lmmvar_varRatioTest2d", (DL_FUNC) &_lmmvar_varRatioTest2d, 5},
     {NULL, NULL, 0}
 };
 
