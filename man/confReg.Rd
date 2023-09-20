@@ -2,30 +2,38 @@
 % Please edit documentation in R/RcppExports.R
 \name{confReg}
 \alias{confReg}
-\title{compute score functions for proportion of variation}
+\title{2d score test statistics matrix for a range of proportion of variation and total variation}
 \usage{
 confReg(range_h, range_p, y, X, lambda, grid = 200L)
 }
 \arguments{
-\item{range_p}{description}
+\item{range_h}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).}
 
-\item{y}{A n\%*1 vector of observed responses}
+\item{range_p}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values.}
 
-\item{X}{A n\%*p predictors matrix, n > p}
+\item{y}{A n\%*1 vector of observed responses.}
 
-\item{lambda}{A n\%*1 vector represent values in the diagonal matrix Lambda}
+\item{X}{A n\%*p predictors matrix, n > p.}
 
-\item{grid}{description}
+\item{lambda}{A n\%*1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+
+\item{grid}{An integer indicates how many different values within the range need to be tested.}
 }
 \value{
-A single value showing the score test statistics
+A matrix showing the score test statistics.
 }
 \description{
 {
-
+for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
+h2 is the proportion of variation of indepedent random component versus the total variation,
+assuming the covariance matrix corresponding to the random component is diagonal (see details).
 }
 }
 \details{
-{
+{Assuming the linear mixed model follows y ~ N(X\% beta, \% sigma_g \% Lambda + \% sigma_e I).
+The proportion of variation of indepedent random component, h2, is \% sigma_g / (\% sigma_g+\% sigma_e),
+the total variation \% sigma_p = \% sigma_g+\% sigma_e, then y can also be seen to follow N(X\% beta, \% sigma_p(h2\% Lambda + (1-h2)I)).
+\% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \% Lambda as well as X and y.
+By the nature of the model, the support set of h2 has to be in [0,1), and the support set of h2 has to be positive.
 }
 }

@@ -1,0 +1,81 @@
+---
+title: "my-vignette"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{my-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+# Installation
+```{r}
+library(lmmvar)
+```
+$$y = X\beta + Zu + e$$
+where $u_{m\times1} \sim N(0, \frac{\sigma_g^2}{m})$, $e_{n\times1} \sim N(0, \sigma_e^2I_n)$, which means
+$$y \sim N(X\beta, \sigma_g^2K+\sigma_e^2I_n)$$
+with $K = \frac{ZZ^T}{m}$.
+
+
+```{r}
+# simulate y = X\beta + Zu + e
+simData <- function(sigma2_g, sigma2_e = 1, X, Z) {  
+  n = dim(X)[1]
+  p = dim(X)[2]
+  m = dim(Z)[2] 
+  beta = rep(0, p)
+  e = rnorm(n, mean = 0, sd = sqrt(sigma2_e))
+  u = rnorm(m, mean = 0, sd = sqrt(sigma2_g/m))
+  y = X %*% beta + Z %*% u + e
+  return(y)
+}
+# simulate Z
+simZ <- function(m,n) {
+  S <- matrix(0, nrow = n, ncol = n)
+  for (kk in 1:n) {
+    for (jj in 1:n) {
+      S[jj,kk] <- 0.9 ^ abs(jj - kk)
+    }
+  }
+  eo <- eigen(S)
+  SSqrt <- eo$vec %*% diag(eo$val^0.5) %*% t(eo$vec)
+  Z <- SSqrt %*% matrix(rnorm(n*m), nrow = n)
+  return(Z)
+}
+```
+
+### example
+```{r}
+N = 10000
+n=100
+p=10
+m=1000
+h2 = 0.5
+s2p = 1 
+
+set.seed(0)
+X = matrix(rnorm(n*p, 0, 1), nrow = n)
+Z <- simZ(m, n)
+y = simData(sigma2_g = h2*s2p, sigma2_e = (1-h2)*s2p, X, Z)
+K = Z %*% t(Z) / m
+# eigen decomp K to diagonal
+eigen_decomp = eigen(K, symmetric = T)
+V = eigen_decomp$vectors
+lambda = eigen_decomp$values
+Xnew = crossprod(V, X)
+ynew = crossprod(V, y)
+```
+
+```{r}
+
+```
+
