@@ -11,6 +11,35 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// varRatioTest1d
+double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
+RcppExport SEXP _lmmvar_varRatioTest1d(SEXP h2SEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(varRatioTest1d(h2, y, X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
+// varRatioTest2d
+double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
+RcppExport SEXP _lmmvar_varRatioTest2d(SEXP h2SEXP, SEXP s2pSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
+    Rcpp::traits::input_parameter< double >::type s2p(s2pSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
+    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(varRatioTest2d(h2, s2p, y, X, lambda));
+    return rcpp_result_gen;
+END_RCPP
+}
 // confInv
 Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda, double tolerance, double confLevel);
 RcppExport SEXP _lmmvar_confInv(SEXP range_hSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP, SEXP toleranceSEXP, SEXP confLevelSEXP) {
@@ -43,41 +72,12 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// varRatioTest1d
-double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
-RcppExport SEXP _lmmvar_varRatioTest1d(SEXP h2SEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(varRatioTest1d(h2, y, X, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
-// varRatioTest2d
-double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda);
-RcppExport SEXP _lmmvar_varRatioTest2d(SEXP h2SEXP, SEXP s2pSEXP, SEXP ySEXP, SEXP XSEXP, SEXP lambdaSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type h2(h2SEXP);
-    Rcpp::traits::input_parameter< double >::type s2p(s2pSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type y(ySEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type X(XSEXP);
-    Rcpp::traits::input_parameter< Eigen::Map<Eigen::MatrixXd> >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(varRatioTest2d(h2, s2p, y, X, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lmmvar_confInv", (DL_FUNC) &_lmmvar_confInv, 6},
-    {"_lmmvar_confReg", (DL_FUNC) &_lmmvar_confReg, 6},
     {"_lmmvar_varRatioTest1d", (DL_FUNC) &_lmmvar_varRatioTest1d, 4},
     {"_lmmvar_varRatioTest2d", (DL_FUNC) &_lmmvar_varRatioTest2d, 5},
+    {"_lmmvar_confInv", (DL_FUNC) &_lmmvar_confInv, 6},
+    {"_lmmvar_confReg", (DL_FUNC) &_lmmvar_confReg, 6},
     {NULL, NULL, 0}
 };
 

@@ -6,6 +6,41 @@
 #' @description {
 #'
 #' }
+#' @param h2 an numeric indicates the desired value of h2 that need to be tested
+#' @param y A n\%*1 vector of observed responses
+#' @param X A n\%*p predictors matrix, n > p
+#' @param lambda A n\%*1 vector represent values in the diagonal matrix Lambda
+#' @return A single value showing the score test statistics
+#' @details {
+#' }
+#' @export
+varRatioTest1d <- function(h2, y, X, lambda) {
+    .Call(`_lmmvar_varRatioTest1d`, h2, y, X, lambda)
+}
+
+#' compute score functions for proportion of variation
+#'
+#' @description {
+#'
+#' }
+#' @param h2 an numeric indicates the desired value of h2 that need to be tested
+#' @param s2p description
+#' @param y A n\%*1 vector of observed responses
+#' @param X A n\%*p predictors matrix, n > p
+#' @param lambda A n\%*1 vector represent values in the diagonal matrix Lambda
+#' @return A single value showing the score test statistics
+#' @details {
+#' }
+#' @export
+varRatioTest2d <- function(h2, s2p, y, X, lambda) {
+    .Call(`_lmmvar_varRatioTest2d`, h2, s2p, y, X, lambda)
+}
+
+#' compute score functions for proportion of variation
+#'
+#' @description {
+#'
+#' }
 #' @param range_h
 #' @param y A n\%*1 vector of observed responses
 #' @param X A n\%*p predictors matrix, n > p
@@ -16,8 +51,6 @@
 #' @details {
 #' }
 #' @export
-NULL
-
 confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
     .Call(`_lmmvar_confInv`, range_h, y, X, lambda, tolerance, confLevel)
 }
@@ -37,52 +70,7 @@ confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
 #' @details {
 #' }
 #' @export
-NULL
-
 confReg <- function(range_h, range_p, y, X, lambda, grid = 200L) {
     .Call(`_lmmvar_confReg`, range_h, range_p, y, X, lambda, grid)
-}
-
-#' compute score functions for proportion of variation
-#'
-#' @description {
-#'
-#' }
-#' @param h2 an numeric indicates the desired value of h2 that need to be tested
-#' @param y A n\%*1 vector of observed responses
-#' @param X A n\%*p predictors matrix, n > p
-#' @param lambda A n\%*1 vector represent values in the diagonal matrix Lambda
-NULL
-
-#' @return A single value showing the score test statistics
-#' @details {
-#' }
-#' @export
-NULL
-
-varRatioTest1d <- function(h2, y, X, lambda) {
-    .Call(`_lmmvar_varRatioTest1d`, h2, y, X, lambda)
-}
-
-#' compute score functions for proportion of variation
-#'
-#' @description {
-#'
-#' }
-#' @param h2 an numeric indicates the desired value of h2 that need to be tested
-#' @param s2p description
-#' @param y A n\%*1 vector of observed responses
-#' @param X A n\%*p predictors matrix, n > p
-#' @param lambda A n\%*1 vector represent values in the diagonal matrix Lambda
-NULL
-
-#' @return A single value showing the score test statistics
-#' @details {
-#' }
-#' @export
-NULL
-
-varRatioTest2d <- function(h2, s2p, y, X, lambda) {
-    .Call(`_lmmvar_varRatioTest2d`, h2, s2p, y, X, lambda)
 }
 
