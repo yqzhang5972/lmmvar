@@ -9,3 +9,5 @@ Description: More about what it does (maybe more than one line)
 License: What license is it under?
 Imports: Rcpp (>= 1.0.11), RcppEigen
 LinkingTo: Rcpp, RcppEigen
+URL: https://github.com/yqzhang5972/lmmvar
+BugReports: https://github.com/yqzhang5972/lmmvar/issues
