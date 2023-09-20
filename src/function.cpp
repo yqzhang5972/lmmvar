@@ -3,11 +3,11 @@
 // [[Rcpp::depends(RcppEigen)]]
 
 
-Eigen::MatrixXd crossProd(Eigen::MatrixXd A, Eigen::MatrixXd B) {
+Eigen::MatrixXd crossProd(const Eigen::MatrixXd& A, const Eigen::MatrixXd& B) {
   return A.transpose()*B;
 }
 
-Eigen::VectorXd rowSum(Eigen::MatrixXd A) {
+Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
   return A.rowwise().sum();
 }
 
