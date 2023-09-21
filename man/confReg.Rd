@@ -25,7 +25,7 @@ A matrix showing the score test statistics.
 \description{
 {
 for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
-h2 is the proportion of variation of indepedent random component versus the total variation,
+h2 is the proportion of variation of independent random component versus the total variation,
 assuming the covariance matrix corresponding to the random component is diagonal (see details).
 }
 }

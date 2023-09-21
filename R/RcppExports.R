@@ -75,7 +75,7 @@ confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
 #'
 #' @description {
 #' for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
-#' h2 is the proportion of variation of indepedent random component versus the total variation,
+#' h2 is the proportion of variation of independent random component versus the total variation,
 #' assuming the covariance matrix corresponding to the random component is diagonal (see details).
 #' }
 #' @param range_h A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).
