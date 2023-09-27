@@ -6,7 +6,7 @@ Date: 2023-09-19
 Author: Who wrote it
 Maintainer: Who to complain to <yourfault@somewhere.net>
 Description: Compute score test statistic on proportion and total variation in a linear mixed model, give a confidence interval of proportion of variation.
-License: What license is it under?
+License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.11), RcppEigen
 LinkingTo: Rcpp, RcppEigen
 URL: https://github.com/yqzhang5972/lmmvar
@@ -17,3 +17,6 @@ Suggests:
     knitr,
     rmarkdown
 VignetteBuilder: knitr
+
+
+
