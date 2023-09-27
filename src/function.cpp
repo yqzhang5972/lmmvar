@@ -146,8 +146,8 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eige
   while (dist > tolerance) {
     a = lower + (upper-lower)/3;
     b = lower + 2* (upper-lower)/3;
-    test_a = varRatioTest1d(a, X, y, lambda);
-    test_b = varRatioTest1d(b, X, y, lambda);
+    test_a = varRatioTest1d(a, y, X, lambda);
+    test_b = varRatioTest1d(b, y, X, lambda);
     if (test_a < test_b) {
       upper = b;
     } else if (test_a > test_b) {
@@ -169,7 +169,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eige
   upper = b;
   double mid1 = (lower+upper) / 2;
   while (upper-lower > tolerance) {
-    test_mid = varRatioTest1d(mid1, X, y, lambda) - critPoint;
+    test_mid = varRatioTest1d(mid1, y, X, lambda) - critPoint;
     if (std::abs(test_mid) < tolerance) {
       break;
     } else if (test_mid < 0) {
@@ -185,7 +185,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eige
   upper = range_h[1];
   double mid2 = (lower+upper) / 2;
   while(upper-lower > tolerance) {
-    test_mid = varRatioTest1d(mid2, X, y, lambda) - critPoint;
+    test_mid = varRatioTest1d(mid2, y, X, lambda) - critPoint;
     if (std::abs(test_mid) < tolerance) {
       break;
     } else if (test_mid < 0) {
@@ -228,7 +228,7 @@ Eigen::MatrixXd confReg(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eigen::V
 
   for (int j = 0; j < grid; j++) {
     for (int k = 0; k < grid; k++) {
-      CR(j, k) = varRatioTest2d(h2seq[j], s2pseq[k], X, y, lambda);
+      CR(j, k) = varRatioTest2d(h2seq[j], s2pseq[k], y, X, lambda);
     }
   }
   return CR;
