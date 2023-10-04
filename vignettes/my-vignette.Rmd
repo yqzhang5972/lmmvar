@@ -38,7 +38,7 @@ simData <- function(sigma2_g, sigma2_e = 1, X, Z) {
   y = X %*% beta + Z %*% u + e
   return(y)
 }
-# simulate Z
+# function to simulate Z
 simZ <- function(m,n) {
   S <- matrix(0, nrow = n, ncol = n)
   for (kk in 1:n) {
@@ -63,22 +63,22 @@ h2 = 0.5
 s2p = 1 
 
 set.seed(0)
-X = matrix(rnorm(n*p, 0, 1), nrow = n)
-Z <- simZ(m, n)
-y = simData(sigma2_g = h2*s2p, sigma2_e = (1-h2)*s2p, X, Z)
-K = Z %*% t(Z) / m
+X = matrix(rnorm(n*p, 0, 1), nrow = n)   # simulate a n by p design matrix
+Z <- simZ(m, n) # simulate z
+y = simData(sigma2_g = h2*s2p, sigma2_e = (1-h2)*s2p, X, Z)  # simulate y = X\beta + Zu + e
+K = Z %*% t(Z) / m  
 # eigen decomp K to diagonal
 eigen_decomp = eigen(K, symmetric = T)
 V = eigen_decomp$vectors
-lambda = eigen_decomp$values
-Xnew = crossprod(V, X)
-ynew = crossprod(V, y)
+lambda = eigen_decomp$values   # K's eigenvalues
+Xnew = crossprod(V, X)         # transform X with V'X
+ynew = crossprod(V, y)         # transform y with V'y
 ```
 
 ```{r}
-varRatioTest1d(h2, ynew, Xnew, lambda) 
-varRatioTest2d(h2, s2p, ynew, Xnew, lambda) 
-confInv(c(1e-4,1-1e-4), ynew, Xnew, lambda)
-confReg(c(1e-4,1-1e-4), c(1e-4,3), ynew, Xnew, lambda)
+varRatioTest1d(h2, ynew, Xnew, lambda)   # score test statistic of h2 at true value
+varRatioTest2d(h2, s2p, ynew, Xnew, lambda) # score test statistic of (h2,sigma^2_p) at true value
+confInv(c(1e-4,1-1e-4), ynew, Xnew, lambda) # 95% confidence interval of h2
+confReg(c(1e-4,1-1e-4), c(1e-4,3), ynew, Xnew, lambda) # matrix of test statistics at a grid of h2 from 0.0001 to 0.9999 and sigma^2_p from 0.0001 to 3.
 ```
 

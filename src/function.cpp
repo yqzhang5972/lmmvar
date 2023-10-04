@@ -32,31 +32,27 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' }
 //' @export
 // [[Rcpp::export]]
-double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
+double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
   int n = X.rows();
   int p = X.cols();
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt(); // Store decomp for later inverse
 
-  //Eigen::MatrixXd V2X = (X.array().colwise() * V2dg_inv).matrix(); // It looks like we do not need to store this
-  Eigen::MatrixXd XV2X = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()); // It looks like we do not need to store this matrix
-  XV2X = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p)); // Is there a way to void this inverse?
-
-  Eigen::MatrixXd betahat = XV2X * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
   double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
   Eigen::ArrayXd V1dg = s2phat * (lambda.array() - 1);
-  Eigen::VectorXd diagH = rowSum(X.array() * (X* XV2X).array());
+  Eigen::VectorXd diagH = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
   Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
   Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
 
   double I_hh = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
   double I_hp = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
   double I_pp = 0.5 * pow(s2phat,-2) * (n - diagH_V2.sum());
-  double Iinv_hh = 1 / (I_hh - pow(I_hp,2) / I_pp);
 
   double score_h = 0.5 * pow(s2phat, -1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
-  double test = Iinv_hh * pow(score_h, 2);
+  double test = 1 / (I_hh - pow(I_hp,2) / I_pp) * pow(score_h, 2);
   return test;
 }
 
@@ -82,35 +78,33 @@ double varRatioTest1d(double h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen
 //' }
 //' @export
 // [[Rcpp::export]]
-double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
+double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
   int n = X.rows();
   int p = X.cols();
 
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
-
-  Eigen::MatrixXd XV2X = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()); // It looks like this is never used after the next line, so let's not store it
-  XV2X = XV2X.llt().solve(Eigen::MatrixXd::Identity(p,p)); // Can we avoid this inverse?
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt();
 
   Eigen::ArrayXd V1dg = s2p * (lambda.array() - 1);
-  Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X).array());
+  Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
   Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
   Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
 
-  double I_hh = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
-  double I_hp = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
-  double I_pp = 0.5 * pow(s2p,-2) * (n - diagH_V2.sum());
   Eigen::MatrixXd I(2,2);
-  I << I_hh, I_hp, I_hp, I_pp;
-  Eigen::MatrixXd Iinv = I.inverse(); // Can we avoid this?
+  I(0,0) = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
+  I(0,1) = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
+  I(1,0) = I(0,1);
+  I(1,1) = 0.5 * pow(s2p,-2) * (n - diagH_V2.sum());
 
-  Eigen::MatrixXd betahat = XV2X * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
 
-  double score_h = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
-  double score_p = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
   Eigen::VectorXd score(2);
-  score << score_h, score_p;
-  double test = score.transpose() * Iinv * score;
+  score(0) = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
+  score(1) = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
+
+  //score << score_h, score_p;
+  double test = score.transpose() * I.inverse() * score;
   return test;
 }
 
