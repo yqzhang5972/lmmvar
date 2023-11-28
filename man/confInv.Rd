@@ -4,20 +4,30 @@
 \alias{confInv}
 \title{find confidence interval for h2}
 \usage{
-confInv(range_h, y, X, lambda, tolerance = 1e-04, confLevel = 0.95)
+confInv(
+  y,
+  X,
+  lambda,
+  range_h = as.numeric(c(0, 1)),
+  tolerance = 1e-04,
+  confLevel = 0.95,
+  maxiter = 50L
+)
 }
 \arguments{
-\item{range_h}{A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).}
-
 \item{y}{A n\eqn{\times}1 vector of observed responses.}
 
 \item{X}{A n\eqn{\times}p predictors matrix, n > p.}
 
 \item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
 
+\item{range_h}{A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).}
+
 \item{tolerance}{A positive numeric. Differences smaller than tolerance are considered to be equal.}
 
 \item{confLevel}{A numeric within [0,1]. Confidence level.}
+
+\item{maxiter}{A positive integer. Warning would appear if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.}
 }
 \value{
 A vector of length 2 showing confidence interval. NA if no root found.

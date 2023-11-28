@@ -53,12 +53,13 @@ varRatioTest2d <- function(h2, s2p, y, X, lambda) {
 #' which is the proportion of variation of indepedent random component versus the total variation in a linear mixed model.
 #' Using Ternary search for finding the minimum, and binary search for finding roots.
 #' }
-#' @param range_h A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).
 #' @param y A n\eqn{\times}1 vector of observed responses.
 #' @param X A n\eqn{\times}p predictors matrix, n > p.
 #' @param lambda A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.
+#' @param range_h A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).
 #' @param tolerance A positive numeric. Differences smaller than tolerance are considered to be equal.
 #' @param confLevel A numeric within [0,1]. Confidence level.
+#' @param maxiter A positive integer. Warning would appear if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.
 #' @return A vector of length 2 showing confidence interval. NA if no root found.
 #' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
 #' The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
@@ -67,8 +68,8 @@ varRatioTest2d <- function(h2, s2p, y, X, lambda) {
 #' By the nature of the model, the support set of h2 has to be in [0,1), and we assuming the test statistics forms a quasi-convex trend.
 #' }
 #' @export
-confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
-    .Call(`_lmmvar_confInv`, range_h, y, X, lambda, tolerance, confLevel)
+confInv <- function(y, X, lambda, range_h = as.numeric( c(0.0, 1.0)), tolerance = 1e-4, confLevel = 0.95, maxiter = 50L) {
+    .Call(`_lmmvar_confInv`, y, X, lambda, range_h, tolerance, confLevel, maxiter)
 }
 
 #' 2d score test statistics matrix for a range of proportion of variation and total variation
@@ -78,11 +79,11 @@ confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
 #' h2 is the proportion of variation of indepedent random component versus the total variation,
 #' assuming the covariance matrix corresponding to the random component is diagonal (see details).
 #' }
-#' @param range_h A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).
-#' @param range_p A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values.
 #' @param y A n\eqn{\times}1 vector of observed responses.
 #' @param X A n\eqn{\times}p predictors matrix, n > p.
 #' @param lambda A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.
+#' @param range_h A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).
+#' @param range_p A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).
 #' @param grid An integer indicates how many different values within the range need to be tested.
 #' @return A matrix showing the score test statistics.
 #' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
@@ -92,7 +93,7 @@ confInv <- function(range_h, y, X, lambda, tolerance = 1e-4, confLevel = 0.95) {
 #' By the nature of the model, the support set of h2 has to be in [0,1), and the support set of h2 has to be positive.
 #' }
 #' @export
-confReg <- function(range_h, range_p, y, X, lambda, grid = 200L) {
-    .Call(`_lmmvar_confReg`, range_h, range_p, y, X, lambda, grid)
+confReg <- function(y, X, lambda, range_h = as.numeric( c(0.0, 1.0)), range_p = as.numeric( c(0.0, 1.0)), grid = 200L) {
+    .Call(`_lmmvar_confReg`, y, X, lambda, range_h, range_p, grid)
 }
 

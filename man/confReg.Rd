@@ -4,18 +4,25 @@
 \alias{confReg}
 \title{2d score test statistics matrix for a range of proportion of variation and total variation}
 \usage{
-confReg(range_h, range_p, y, X, lambda, grid = 200L)
+confReg(
+  y,
+  X,
+  lambda,
+  range_h = as.numeric(c(0, 1)),
+  range_p = as.numeric(c(0, 1)),
+  grid = 200L
+)
 }
 \arguments{
-\item{range_h}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).}
-
-\item{range_p}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values.}
-
 \item{y}{A n\eqn{\times}1 vector of observed responses.}
 
 \item{X}{A n\eqn{\times}p predictors matrix, n > p.}
 
 \item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+
+\item{range_h}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).}
+
+\item{range_p}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).}
 
 \item{grid}{An integer indicates how many different values within the range need to be tested.}
 }
