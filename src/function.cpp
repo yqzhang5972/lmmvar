@@ -31,28 +31,30 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' }
 //' @export
 // [[Rcpp::export]]
-double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
- int n = X.rows();
- int p = X.cols();
- Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
- Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt(); // Store decomp for later inverse
+double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda) {
+  int n = X.rows();
+  int p = X.cols();
+  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt(); // Store decomp for later
 
- Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
- Eigen::MatrixXd ehat = y - X * betahat;
- double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
+  Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd ehat = y - X * betahat;
+  double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
- Eigen::ArrayXd V1dg = s2phat * (lambda.array() - 1);
- Eigen::VectorXd diagH = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
- Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
- Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
+  Eigen::ArrayXd V1dg = s2phat * (lambda.array() - 1);  //diag value for V1
+  Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
+  Eigen::ArrayXd diagQH = Eigen::ArrayXd::Constant(n,1,1);
+  Eigen::VectorXd diagHV2 = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array()).array() * V2dg_inv;
+  diagQH = (diagQH - diagHV2.array()) * V2dg_inv_V1dg;  // diag value for (I-P)V2^(-1)^V1
 
- double I_hh = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
- double I_hp = 0.5 * pow(s2phat,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
- double I_pp = 0.5 * pow(s2phat,-2) * (n - diagH_V2.sum());
+  //double I_hh = 0.5 * (diagQH * V2dg_inv_V1dg).sum();
+  double I_hh = 0.5 * (diagQH * diagQH).sum();
+  double I_hp = 0.5 * diagQH.sum();
+  double I_pp = 0.5 * (n - p);
 
- double score_h = 0.5 * pow(s2phat, -1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
- double test = 1 / (I_hh - pow(I_hp,2) / I_pp) * pow(score_h, 2);
- return test;
+  double score_h = 0.5 * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) - diagQH.sum());
+  double test = pow(score_h, 2) / (I_hh - pow(I_hp,2) / I_pp)  ;
+  return test;
 }
 
 
@@ -77,34 +79,38 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
 //' }
 //' @export
 // [[Rcpp::export]]
-double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda) {
- int n = X.rows();
- int p = X.cols();
+double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda) {
+  int n = X.rows();
+  int p = X.cols();
 
- Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
- Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt();
+  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt();
 
- Eigen::ArrayXd V1dg = s2p * (lambda.array() - 1);
- Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
- Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
- Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
+  Eigen::ArrayXd V1dg = s2p * (lambda.array() - 1);
+  // Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
+  // Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
+  Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
+  Eigen::ArrayXd diagQH = Eigen::ArrayXd::Constant(n,1,1);
+  Eigen::VectorXd diagHV2 = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array()).array() * V2dg_inv;
+  diagQH = (diagQH - diagHV2.array()) * V2dg_inv_V1dg;
 
- Eigen::MatrixXd I(2,2);
- I(0,0) = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.pow(2).sum() - (diagH_V2 * V2dg_inv_V1dg.pow(2)).sum());
- I(0,1) = 0.5 * pow(s2p,-2) * (V2dg_inv_V1dg.sum() - (diagH_V2 * V2dg_inv_V1dg).sum());
- I(1,0) = I(0,1);
- I(1,1) = 0.5 * pow(s2p,-2) * (n - diagH_V2.sum());
+  Eigen::MatrixXd I(2,2);
+  //I(0,0) = 0.5 * (diagQH * V2dg_inv_V1dg).sum();
+  I(0,0) = 0.5 * (diagQH * diagQH).sum();
+  I(0,1) = 0.5 * diagQH.sum();
+  I(1,0) = I(0,1);
+  I(1,1) = 0.5 * (n - p);
 
- Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
- Eigen::MatrixXd ehat = y - X * betahat;
+  Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
+  Eigen::MatrixXd ehat = y - X * betahat;
 
- Eigen::VectorXd score(2);
- score(0) = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) + (diagH_V2*V2dg_inv_V1dg).sum() - V2dg_inv_V1dg.sum());
- score(1) = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
+  Eigen::VectorXd score(2);
+  score(0) = 0.5 * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) - diagQH.sum());
+  score(1) = 0.5 * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
 
- //score << score_h, score_p;
- double test = score.transpose() * I.inverse() * score;
- return test;
+  //score << score_h, score_p;
+  double test = score.transpose() * I.inverse() * score;
+  return test;
 }
 
 
@@ -130,7 +136,7 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' }
 //' @export
 // [[Rcpp::export]]
-Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda,
+Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
                            const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
                            const double tolerance = 1e-4, const double confLevel = 0.95, const int maxiter = 50) {
  double dist = R_PosInf;
@@ -233,7 +239,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' }
 //' @export
 // [[Rcpp::export]]
-Eigen::MatrixXd confReg(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda,
+Eigen::MatrixXd confReg(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
                        const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
                        const Rcpp::NumericVector& range_p = Rcpp::NumericVector::create(0.0, 1.0),
                        int grid = 200) {
