@@ -34,26 +34,39 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda) {
   int n = X.rows();
   int p = X.cols();
-  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
-  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt(); // Store decomp for later
+  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2)); //O(n)
+  Eigen::MatrixXd V2negsqX = (X.array().colwise() * V2dg_inv.sqrt()).matrix(); // O(np)
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(V2negsqX, V2negsqX).llt(); // Store decomp for later , O(np^2)+llt
+
+  //Q = bar.A
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(n,n) - V2negsqX * XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * V2negsqX.transpose(); //O(pn^2)
+  Eigen::ArrayXd D = (lambda.array() - 1) * V2dg_inv; //O(n)
+  //Eigen::MatrixXd DQ = (Q.array().colwise() * D).matrix(); //O(n^2)
 
   Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
   double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
-  Eigen::ArrayXd V1dg = s2phat * (lambda.array() - 1);  //diag value for V1
-  Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
-  Eigen::ArrayXd diagQH = Eigen::ArrayXd::Constant(n,1,1);
-  Eigen::VectorXd diagHV2 = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array()).array() * V2dg_inv;
-  diagQH = (diagQH - diagHV2.array()) * V2dg_inv_V1dg;  // diag value for (I-P)V2^(-1)^V1
-
-  //double I_hh = 0.5 * (diagQH * V2dg_inv_V1dg).sum();
-  double I_hh = 0.5 * (diagQH * diagQH).sum();
-  double I_hp = 0.5 * diagQH.sum();
-  double I_pp = 0.5 * (n - p);
-
-  double score_h = 0.5 * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2phat,-1) - diagQH.sum());
+  double traceQD = 0;
+  double I_hh = 0;
+  for (int i=0; i < n; i++) {
+    traceQD += Q(i,i) * D(i);
+    for (int j=i; j < n; j++) {
+      if (i == j) {
+        I_hh += Q(i,j) * Q(i,j) * D(i) * D(j) / 2;
+      } else {
+        I_hh += Q(i,j) * Q(i,j) * D(i) * D(j);//DQ(i,j) * DQ(j,i);
+      }
+    }
+  }
+  double I_hp = 0.5 * traceQD * pow(s2phat,-1); //0.5 * DQ.diagonal().sum() * pow(s2phat,-1);
+  double I_pp = 0.5 * (n-p) * pow(s2phat,-2);
+  double score_h = 0.5 * ((ehat.array().pow(2)*D*V2dg_inv).sum()*pow(s2phat,-1) - traceQD);
   double test = pow(score_h, 2) / (I_hh - pow(I_hp,2) / I_pp)  ;
+  // return Rcpp::List::create(
+  //   Rcpp::Named("I_hh") = I_hh, Rcpp::Named("I_hp") = I_hp, Rcpp::Named("I_pp") = I_pp,
+  //               Rcpp::Named("score_h") = score_h, Rcpp::Named("test") = test,
+  //               Rcpp::Named("s2phat") = s2phat, Rcpp::Named("Q") = Q, Rcpp::Named("D") = D);
   return test;
 }
 
@@ -83,33 +96,45 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
   int n = X.rows();
   int p = X.cols();
 
-  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2));
-  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt();
+  Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2)); //O(n)
+  Eigen::MatrixXd V2negsqX = (X.array().colwise() * V2dg_inv.sqrt()).matrix(); // O(np)
+  Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(V2negsqX, V2negsqX).llt(); // Store decomp for later , O(np^2)+llt
 
-  Eigen::ArrayXd V1dg = s2p * (lambda.array() - 1);
-  // Eigen::VectorXd diagH = rowSum(X.array() * (X*XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array());
-  // Eigen::ArrayXd diagH_V2 = diagH.array() * V2dg_inv;
-  Eigen::ArrayXd V2dg_inv_V1dg = V2dg_inv * V1dg;
-  Eigen::ArrayXd diagQH = Eigen::ArrayXd::Constant(n,1,1);
-  Eigen::VectorXd diagHV2 = rowSum(X.array() * (X* XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p))).array()).array() * V2dg_inv;
-  diagQH = (diagQH - diagHV2.array()) * V2dg_inv_V1dg;
-
-  Eigen::MatrixXd I(2,2);
-  //I(0,0) = 0.5 * (diagQH * V2dg_inv_V1dg).sum();
-  I(0,0) = 0.5 * (diagQH * diagQH).sum();
-  I(0,1) = 0.5 * diagQH.sum();
-  I(1,0) = I(0,1);
-  I(1,1) = 0.5 * (n - p);
+  //Q = bar.A
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Identity(n,n) - V2negsqX * XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * V2negsqX.transpose(); //O(n^2p)
+  Eigen::ArrayXd D = (lambda.array() - 1) * V2dg_inv; //O(n)
+  //Eigen::MatrixXd DQ = (Q.array().colwise() * D).matrix(); //O(n^2)
 
   Eigen::MatrixXd betahat = XV2X_llt.solve(Eigen::MatrixXd::Identity(p,p)) * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
+  // double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
+
+  double traceQD = 0;
+  Eigen::MatrixXd I(2,2);
+  I(0,0) = 0;
+  for (int i=0; i < n; i++) {
+    traceQD += Q(i,i) * D(i);
+    for (int j=i; j < n; j++) {
+      if (i == j) {
+        I(0,0) += Q(i,j) * Q(i,j) * D(i) * D(j) / 2;
+      } else {
+        I(0,0) += Q(i,j) * Q(i,j) * D(i) * D(j);//DQ(i,j) * DQ(j,i);
+      }
+    }
+  }
+  I(0,1) = 0.5 * traceQD * pow(s2p,-1); //0.5 * DQ.diagonal().sum() * pow(s2phat,-1);
+  I(1,0) = I(0,1);
+  I(1,1)= 0.5 * (n-p) * pow(s2p,-2);
 
   Eigen::VectorXd score(2);
-  score(0) = 0.5 * ((ehat.array().pow(2)*V2dg_inv*V2dg_inv_V1dg).sum()*pow(s2p,-1) - diagQH.sum());
-  score(1) = 0.5 * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
+  score(0) = 0.5 * ((ehat.array().pow(2)*D*V2dg_inv).sum()*pow(s2p,-1) - traceQD);
+  score(1) = 0.5 * pow(s2p,-1) * ((ehat.array().pow(2)*V2dg_inv).sum()*pow(s2p,-1) - (n-p));
 
-  //score << score_h, score_p;
   double test = score.transpose() * I.inverse() * score;
+  // return Rcpp::List::create(
+  //   Rcpp::Named("I") = I,
+  //   Rcpp::Named("score") = score, Rcpp::Named("test") = test,
+  //   Rcpp::Named("Q") = Q, Rcpp::Named("D") = D);
   return test;
 }
 
