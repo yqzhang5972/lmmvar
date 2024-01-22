@@ -138,87 +138,102 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' By the nature of the model, the support set of h2 has to be in [0,1), and we assuming the test statistics forms a quasi-convex trend.
 //' }
 //' @export
-// [[Rcpp::export]]
-Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
-                           const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
-                           const double tolerance = 1e-4, const double confLevel = 0.95, const int maxiter = 50) {
- double dist = R_PosInf;
- double critPoint = R::qchisq(confLevel, 1, 1, 0);
- double lower = range_h[0];
- double upper = range_h[1];
- double a, b, test_a, test_b, test_mid;
+ // [[Rcpp::export]]
+ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
+                             const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
+                             const double tolerance = 1e-4, const double confLevel = 0.95, const int maxiter = 50) {
+   double dist = R_PosInf;
+   double critPoint = R::qchisq(confLevel, 1, 1, 0);
+   double lower = range_h[0];
+   double upper = range_h[1];
+   double a, b, test_a, test_b, test_mid;
 
- int iter = 0;
- while (dist > tolerance) {
-   a = lower + (upper-lower)/3;
-   b = lower + 2* (upper-lower)/3;
-   test_a = varRatioTest1d(a, y, X, lambda);
-   test_b = varRatioTest1d(b, y, X, lambda);
-   if (test_a < test_b) {
-     upper = b;
-   } else if (test_a > test_b) {
-     lower = a;
-   } else {
-     upper = b;
-     lower = a;
+   // first loop: finding a point in the CI while trying to find minimum value, assume quasi-convex.
+   int iter = 0;
+   while (dist > tolerance) {
+     a = lower + (upper-lower)/3;
+     b = lower + 2* (upper-lower)/3;
+     test_a = varRatioTest1d(a, y, X, lambda);
+     if (test_a < critPoint) { // a is a point within the CI
+       b = a;                  // find CI lower bound in (range_h[0], b) and upper bound in (a, range_h[1])
+       break;
+     }
+     test_b = varRatioTest1d(b, y, X, lambda);
+     if (test_b < critPoint) { // b is a point within the CI
+       a = b;
+       break;
+     }
+     // both test_a and test_b are greater than critPoint:
+     if (test_a < test_b) {
+       upper = b;
+     } else if (test_a > test_b) {
+       lower = a;
+     } else {
+       upper = b;
+       lower = a;
+     }
+     dist = b - a;
+     iter++;
+     if (iter > maxiter) {
+       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for minimum tried");
+       break;
+     }
    }
-   dist = b - a;
-   iter++;
-   if (iter > maxiter) {
-     Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for minimum tried");
+   if (test_a > critPoint) {
+     if (test_b > critPoint) {  // all test statistics larger than qchisq, no root
+       Rcpp::NumericVector result = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
+       Rcpp::warning("Warning: no test statistics under threshold, return NA");
+       return result;
+     }
    }
- }
- if (test_a > critPoint & test_b > critPoint) {   // all test statistics larger than qchisq, no root
-   Rcpp::NumericVector result = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
-   Rcpp::warning("Warning: no test statistics under threshold, return NA");
+
+   // thus lower bd of CI should be in [range_h[0],a] and upper bd should be in [a,range_h[1]]
+   // for lower bound
+   lower = range_h[0];
+   upper = b;
+   double mid1 = (lower+upper) / 2;
+   iter = 0;
+   while (upper-lower > tolerance) {
+     test_mid = varRatioTest1d(mid1, y, X, lambda) - critPoint;
+     if (std::abs(test_mid) < tolerance) {
+       break;
+     } else if (test_mid < 0) {
+       upper = mid1;
+     } else {
+       lower = mid1;
+     }
+     mid1 = (lower+upper) / 2;
+     iter++;
+     if (iter > maxiter) {
+       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+       break;
+     }
+   }
+
+   // for upper bound
+   lower = a;
+   upper = range_h[1];
+   double mid2 = (lower+upper) / 2;
+   iter = 0;
+   while(upper-lower > tolerance) {
+     test_mid = varRatioTest1d(mid2, y, X, lambda) - critPoint;
+     if (std::abs(test_mid) < tolerance) {
+       break;
+     } else if (test_mid < 0) {
+       lower = mid2;
+     } else {
+       upper = mid2;
+     }
+     mid2 = (lower+upper) / 2;
+     iter++;
+     if (iter > maxiter) {
+       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for upper bound tried");
+       break;
+     }
+   }
+   Rcpp::NumericVector result = Rcpp::NumericVector::create(mid1, mid2);
    return result;
  }
-
- // thus lower bd of CI should be in [0,a] and upper bd should be in [a,1]
- // for lower bound
- lower = range_h[0];
- upper = b;
- double mid1 = (lower+upper) / 2;
- iter = 0;
- while (upper-lower > tolerance) {
-   test_mid = varRatioTest1d(mid1, y, X, lambda) - critPoint;
-   if (std::abs(test_mid) < tolerance) {
-     break;
-   } else if (test_mid < 0) {
-     upper = mid1;
-   } else {
-     lower = mid1;
-   }
-   mid1 = (lower+upper) / 2;
-   iter++;
-   if (iter > maxiter) {
-     Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
-   }
- }
-
- // for upper bound
- lower = a;
- upper = range_h[1];
- double mid2 = (lower+upper) / 2;
- iter = 0;
- while(upper-lower > tolerance) {
-   test_mid = varRatioTest1d(mid2, y, X, lambda) - critPoint;
-   if (std::abs(test_mid) < tolerance) {
-     break;
-   } else if (test_mid < 0) {
-     lower = mid2;
-   } else {
-     upper = mid2;
-   }
-   mid2 = (lower+upper) / 2;
-   iter++;
-   if (iter > maxiter) {
-     Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for upper bound tried");
-   }
- }
- Rcpp::NumericVector result = Rcpp::NumericVector::create(mid1, mid2);
- return result;
-}
 
 //' 2d score test statistics matrix for a range of proportion of variation and total variation
 //'
