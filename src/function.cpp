@@ -288,7 +288,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
       mid2 = (lower+upper) / 2;
       iter++;
       if (iter > maxiter) {
-        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for upper bound tried");
         break;
       }
     }
