@@ -4,7 +4,7 @@
 \alias{varRatioTest1d}
 \title{1d score test statistics for proportion of variation}
 \usage{
-varRatioTest1d(h2, y, X, lambda)
+varRatioTest1d(h2, y, X, lambda, sqRoot = FALSE)
 }
 \arguments{
 \item{h2}{an numeric indicates the desired value of proportion of variation that need to be tested. Needs to be within [0,1).}
@@ -14,6 +14,8 @@ varRatioTest1d(h2, y, X, lambda)
 \item{X}{A n\eqn{\times}p predictors matrix, n > p.}
 
 \item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+
+\item{sqRoot}{A boolean indicates whether to return score test statistic or +/- square root of it (\eqn{I^{-1/2}U}). Default is FALSE.}
 }
 \value{
 A single value showing the score test statistics at h2.

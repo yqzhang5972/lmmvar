@@ -11,6 +11,7 @@
 #' @param y A n\eqn{\times}1 vector of observed responses.
 #' @param X A n\eqn{\times}p predictors matrix, n > p.
 #' @param lambda A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.
+#' @param sqRoot A boolean indicates whether to return score test statistic or +/- square root of it (\eqn{I^{-1/2}U}). Default is FALSE.
 #' @return A single value showing the score test statistics at h2.
 #' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
 #' The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
@@ -19,8 +20,8 @@
 #' By the nature of the model, the support set of h2 has to be in [0,1). The test statistic follows \eqn{\Chi_1}.
 #' }
 #' @export
-varRatioTest1d <- function(h2, y, X, lambda) {
-    .Call(`_lmmvar_varRatioTest1d`, h2, y, X, lambda)
+varRatioTest1d <- function(h2, y, X, lambda, sqRoot = FALSE) {
+    .Call(`_lmmvar_varRatioTest1d`, h2, y, X, lambda, sqRoot)
 }
 
 #' 2d score test statistics for proportion of variation and total variation
@@ -59,7 +60,8 @@ varRatioTest2d <- function(h2, s2p, y, X, lambda) {
 #' @param range_h A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).
 #' @param tolerance A positive numeric. Differences smaller than tolerance are considered to be equal.
 #' @param confLevel A numeric within [0,1]. Confidence level.
-#' @param maxiter A positive integer. Warning would appear if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.
+#' @param maxiter A positive integer. Stop and warning if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.
+#' @param type A string gives whether a "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".
 #' @return A vector of length 2 showing confidence interval. NA if no root found.
 #' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
 #' The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
@@ -68,8 +70,8 @@ varRatioTest2d <- function(h2, s2p, y, X, lambda) {
 #' By the nature of the model, the support set of h2 has to be in [0,1), and we assuming the test statistics forms a quasi-convex trend.
 #' }
 #' @export
-confInv <- function(y, X, lambda, range_h = as.numeric( c(0.0, 1.0)), tolerance = 1e-4, confLevel = 0.95, maxiter = 50L) {
-    .Call(`_lmmvar_confInv`, y, X, lambda, range_h, tolerance, confLevel, maxiter)
+confInv <- function(y, X, lambda, range_h = as.numeric( c(0.0, 1.0)), tolerance = 1e-4, confLevel = 0.95, maxiter = 50L, type = "two-sided") {
+    .Call(`_lmmvar_confInv`, y, X, lambda, range_h, tolerance, confLevel, maxiter, type)
 }
 
 #' 2d score test statistics matrix for a range of proportion of variation and total variation

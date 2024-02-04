@@ -22,6 +22,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' @param y A n\eqn{\times}1 vector of observed responses.
 //' @param X A n\eqn{\times}p predictors matrix, n > p.
 //' @param lambda A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.
+//' @param sqRoot A boolean indicates whether to return score test statistic or +/- square root of it (\eqn{I^{-1/2}U}). Default is FALSE.
 //' @return A single value showing the score test statistics at h2.
 //' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
 //' The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
@@ -31,7 +32,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' }
 //' @export
 // [[Rcpp::export]]
-double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda) {
+double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda, const bool sqRoot = false) {
   int n = X.rows();
   int p = X.cols();
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2)); //O(n)
@@ -46,7 +47,7 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
   double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
   Eigen::ArrayXd diagP = rowSum(X.array() * (X* A_tilde).array()).array() * V2dg_inv; // diag of X(X'V2X)^{-1}X' times V2^{-1}
-  Eigen::ArrayXd diagQ = Eigen::ArrayXd::Constant(n,1,1) - diagP;  // diag value for (I-P)V2^(-1)^V1: (1,1,...,1)T-diagP
+  Eigen::ArrayXd diagQ = Eigen::ArrayXd::Constant(n,1,1) - diagP;  // diag value for (I-P) V2^(-1) V1: (1,1,...,1)T - diagP
 
   double I_hh = (D*D).sum() - 2 * (D*D*diagP).sum(); // tr(QDQD) = tr(D^2) - 2tr(PD^2) + tr(PDPD)
   Eigen::MatrixXd B_tilde = crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
@@ -57,7 +58,12 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
   double score_h = 0.5 * ((ehat.array().pow(2) * V2dg_inv * D).sum()*pow(s2phat, -1) - (D * diagQ).sum());
   double I_hp = 0.5 * (D * diagQ).sum() * pow(s2phat,-1);
   double I_pp = 0.5 * (n-p) * pow(s2phat,-2);
-  double test = pow(score_h, 2) / (I_hh - pow(I_hp,2) / I_pp)  ;
+  double test;
+  if (sqRoot) {
+    test = score_h / sqrt(I_hh - pow(I_hp,2) / I_pp);
+  } else{
+    test = pow(score_h, 2) / (I_hh - pow(I_hp,2) / I_pp);
+  }
   return test;
 }
 
@@ -129,7 +135,8 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' @param range_h A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).
 //' @param tolerance A positive numeric. Differences smaller than tolerance are considered to be equal.
 //' @param confLevel A numeric within [0,1]. Confidence level.
-//' @param maxiter A positive integer. Warning would appear if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.
+//' @param maxiter A positive integer. Stop and warning if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.
+//' @param type A string gives whether a "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".
 //' @return A vector of length 2 showing confidence interval. NA if no root found.
 //' @details { Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
 //' The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
@@ -139,101 +146,159 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' }
 //' @export
  // [[Rcpp::export]]
- Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
-                             const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
-                             const double tolerance = 1e-4, const double confLevel = 0.95, const int maxiter = 50) {
-   double dist = R_PosInf;
-   double critPoint = R::qchisq(confLevel, 1, 1, 0);
-   double lower = range_h[0];
-   double upper = range_h[1];
-   double a, b, test_a, test_b, test_mid;
+Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::VectorXd> lambda,
+                           const Rcpp::NumericVector& range_h = Rcpp::NumericVector::create(0.0, 1.0),
+                           const double tolerance = 1e-4, double confLevel = 0.95, const int maxiter = 50, const std::string type = "two-sided") {
+  // check if there is test-statistics within range_h
+  Rcpp::NumericVector result = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
+  double lower = range_h[0], upper = range_h[1];
+  double critPoint, test_mid, mid1, mid2;
+  int iter = 0;
 
-   // first loop: finding a point in the CI while trying to find minimum value, assume quasi-convex.
-   int iter = 0;
-   while (dist > tolerance) {
-     a = lower + (upper-lower)/3;
-     b = lower + 2* (upper-lower)/3;
-     test_a = varRatioTest1d(a, y, X, lambda);
-     if (test_a < critPoint) { // a is a point within the CI
-       b = a;                  // find CI lower bound in (range_h[0], b) and upper bound in (a, range_h[1])
-       break;
-     }
-     test_b = varRatioTest1d(b, y, X, lambda);
-     if (test_b < critPoint) { // b is a point within the CI
-       a = b;
-       break;
-     }
-     // both test_a and test_b are greater than critPoint:
-     if (test_a < test_b) {
-       upper = b;
-     } else if (test_a > test_b) {
-       lower = a;
-     } else {
-       upper = b;
-       lower = a;
-     }
-     dist = b - a;
-     iter++;
-     if (iter > maxiter) {
-       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for minimum tried");
-       break;
-     }
-   }
-   if (test_a > critPoint) {
-     if (test_b > critPoint) {  // all test statistics larger than qchisq, no root
-       Rcpp::NumericVector result = Rcpp::NumericVector::create(NA_REAL, NA_REAL);
-       Rcpp::warning("Warning: no test statistics under threshold, return NA");
-       return result;
-     }
-   }
-
-   // thus lower bd of CI should be in [range_h[0],a] and upper bd should be in [a,range_h[1]]
-   // for lower bound
-   lower = range_h[0];
-   upper = b;
-   double mid1 = (lower+upper) / 2;
-   iter = 0;
-   while (upper-lower > tolerance) {
-     test_mid = varRatioTest1d(mid1, y, X, lambda) - critPoint;
-     if (std::abs(test_mid) < tolerance) {
-       break;
-     } else if (test_mid < 0) {
-       upper = mid1;
-     } else {
-       lower = mid1;
-     }
-     mid1 = (lower+upper) / 2;
-     iter++;
-     if (iter > maxiter) {
-       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
-       break;
-     }
-   }
-
-   // for upper bound
-   lower = a;
-   upper = range_h[1];
-   double mid2 = (lower+upper) / 2;
-   iter = 0;
-   while(upper-lower > tolerance) {
-     test_mid = varRatioTest1d(mid2, y, X, lambda) - critPoint;
-     if (std::abs(test_mid) < tolerance) {
-       break;
-     } else if (test_mid < 0) {
-       lower = mid2;
-     } else {
-       upper = mid2;
-     }
-     mid2 = (lower+upper) / 2;
-     iter++;
-     if (iter > maxiter) {
-       Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for upper bound tried");
-       break;
-     }
-   }
-   Rcpp::NumericVector result = Rcpp::NumericVector::create(mid1, mid2);
-   return result;
- }
+  if (type == "two-sided") {
+    critPoint = R::qchisq(confLevel, 1, 1, 0);
+    double dist = R_PosInf;
+    double a, b, test_a, test_b;
+    // first loop: finding a point in the CI while trying to find minimum value, assume quasi-convex.
+    while (dist > tolerance) {
+      a = lower + (upper-lower)/3;
+      b = lower + 2* (upper-lower)/3;
+      test_a = varRatioTest1d(a, y, X, lambda);
+      if (test_a < critPoint) { // a is a point within the CI
+        b = a;                  // find CI lower bound in (range_h[0], b) and upper bound in (a, range_h[1])
+        break;
+      }
+      test_b = varRatioTest1d(b, y, X, lambda);
+      if (test_b < critPoint) { // b is a point within the CI
+        a = b;
+        break;
+      }
+      // both test_a and test_b are greater than critPoint:
+      if (test_a < test_b) {
+        upper = b;
+      } else if (test_a > test_b) {
+        lower = a;
+      } else {
+        upper = b;
+        lower = a;
+      }
+      dist = b - a;
+      iter++;
+      if (iter > maxiter) {
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for minimum tried");
+        break;
+      }
+    }
+    if (test_a > critPoint) {
+      if (test_b > critPoint) {  // all test statistics larger than qchisq, no root
+        Rcpp::warning("Warning: no test statistics under threshold, return NA");
+        return result;
+      }
+    }
+    // thus lower bd of CI should be in [range_h[0],a] and upper bd should be in [a,range_h[1]]
+    // for lower bound
+    lower = range_h[0];
+    upper = b;
+    double mid1 = (lower+upper) / 2;
+    iter = 0;
+    while (upper-lower > tolerance) {
+      test_mid = varRatioTest1d(mid1, y, X, lambda) - critPoint;
+      if (std::abs(test_mid) < tolerance) {
+        break;
+      } else if (test_mid < 0) {
+        upper = mid1;
+      } else {
+        lower = mid1;
+      }
+      mid1 = (lower+upper) / 2;
+      iter++;
+      if (iter > maxiter) {
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+        break;
+      }
+    }
+    // for upper bound
+    lower = a;
+    upper = range_h[1];
+    double mid2 = (lower+upper) / 2;
+    iter = 0;
+    while(upper-lower > tolerance) {
+      test_mid = varRatioTest1d(mid2, y, X, lambda) - critPoint;
+      if (std::abs(test_mid) < tolerance) {
+        break;
+      } else if (test_mid < 0) {
+        lower = mid2;
+      } else {
+        upper = mid2;
+      }
+      mid2 = (lower+upper) / 2;
+      iter++;
+      if (iter > maxiter) {
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for upper bound tried");
+        break;
+      }
+    }
+    result = Rcpp::NumericVector::create(mid1, mid2);
+    return result;
+  } else if (type == "lower_bd") {
+    critPoint = R::qnorm(confLevel, 0.0, 1.0, 1, 0);
+    if (varRatioTest1d(range_h[1], y, X, lambda, true) > critPoint) {
+      Rcpp::warning("Warning: no test statistics in the range under threshold, return NA.");
+      return result;
+    }
+    // upper bound is set to range_h[1], try to find lower bound
+    mid1 = (lower+upper) / 2;
+    iter = 0;
+    while (upper-lower > tolerance) {
+      test_mid = varRatioTest1d(mid1, y, X, lambda, true) - critPoint;
+      if (std::abs(test_mid) < tolerance) {
+        break;
+      } else if (test_mid < 0) {
+        upper = mid1;
+      } else {
+        lower = mid1;
+      }
+      mid1 = (lower+upper) / 2;
+      iter++;
+      if (iter > maxiter) {
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+        break;
+      }
+    }
+    result = Rcpp::NumericVector::create(mid1, range_h[1]);
+    return result;
+  } else if (type == "upper_bd") {
+    critPoint = R::qnorm(confLevel, 0.0, 1.0, 1, 0);
+    if (varRatioTest1d(range_h[1], y, X, lambda, true) < -critPoint) {
+      Rcpp::warning("Warning: no test statistics in the range under threshold, return NA.");
+      return result;
+    }
+    //
+    mid2 = (lower+upper) / 2;
+    iter = 0;
+    while (upper-lower > tolerance) {
+      test_mid = varRatioTest1d(mid2, y, X, lambda, true) + critPoint; // R::qnorm(1-confLevel, 0.0, 1.0, 1, 0) = -critPoint
+      if (std::abs(test_mid) < tolerance) {
+        break;
+      } else if (test_mid < 0) {
+        upper = mid2;
+      } else {
+        lower = mid2;
+      }
+      mid2 = (lower+upper) / 2;
+      iter++;
+      if (iter > maxiter) {
+        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+        break;
+      }
+    }
+    result = Rcpp::NumericVector::create(range_h[0], mid2);
+    return result;
+  } else {
+    Rcpp::warning("Warning: Please specify type as 'two-sided', 'lower_bd' or 'upper_bd'.");
+    return result;
+  }
+}
 
 //' 2d score test statistics matrix for a range of proportion of variation and total variation
 //'

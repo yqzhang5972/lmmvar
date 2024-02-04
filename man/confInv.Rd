@@ -11,7 +11,8 @@ confInv(
   range_h = as.numeric(c(0, 1)),
   tolerance = 1e-04,
   confLevel = 0.95,
-  maxiter = 50L
+  maxiter = 50L,
+  type = "two-sided"
 )
 }
 \arguments{
@@ -27,7 +28,9 @@ confInv(
 
 \item{confLevel}{A numeric within [0,1]. Confidence level.}
 
-\item{maxiter}{A positive integer. Warning would appear if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.}
+\item{maxiter}{A positive integer. Stop and warning if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.}
+
+\item{type}{A string gives whether a "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".}
 }
 \value{
 A vector of length 2 showing confidence interval. NA if no root found.
