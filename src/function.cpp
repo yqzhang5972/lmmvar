@@ -38,22 +38,20 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
   Eigen::ArrayXd V2dg_inv = 1 / (h2 * lambda.array() + (1 - h2)); //O(n)
   Eigen::ArrayXd D = (lambda.array() - 1) * V2dg_inv; //O(n)
 
-  // Eigen::LLT<Eigen::MatrixXd> XV2X_llt = crossProd(X, (X.array().colwise() * V2dg_inv).matrix()).llt(); // Store decomp for later , O(np^2)+llt
   Eigen::MatrixXd V2negsqX = (X.array().colwise() * V2dg_inv.sqrt()).matrix(); // O(np)
-  Eigen::MatrixXd A_tilde = crossProd(V2negsqX, V2negsqX).llt().solve(Eigen::MatrixXd::Identity(p,p)); // Store decomp for later , O(np^2)+llt
+  Eigen::MatrixXd A_tilde = crossProd(V2negsqX, V2negsqX).llt().solve(Eigen::MatrixXd::Identity(p,p));
 
   Eigen::MatrixXd betahat = A_tilde * crossProd(X, (V2dg_inv * y.array()).matrix());
   Eigen::MatrixXd ehat = y - X * betahat;
   double s2phat = (ehat.array().pow(2) * V2dg_inv).sum() / (n - p);
 
-  Eigen::ArrayXd diagP = rowSum(X.array() * (X* A_tilde).array()).array() * V2dg_inv; // diag of X(X'V2X)^{-1}X' times V2^{-1}
+  Eigen::ArrayXd diagP = rowSum(X.array() * (X * A_tilde).array()).array() * V2dg_inv;
   Eigen::ArrayXd diagQ = Eigen::ArrayXd::Constant(n,1,1) - diagP;  // diag value for (I-P) V2^(-1) V1: (1,1,...,1)T - diagP
 
   double I_hh = (D*D).sum() - 2 * (D*D*diagP).sum(); // tr(QDQD) = tr(D^2) - 2tr(PD^2) + tr(PDPD)
-  Eigen::MatrixXd B_tilde = crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
-  I_hh = 0.5 * (I_hh + (A_tilde * B_tilde * A_tilde * B_tilde).diagonal().sum());
-  // Eigen::MatrixXd AB_tilde = A_tilde * crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
-  // I_hh = 0.5 * (I_hh + (AB_tilde.transpose().array() * AB_tilde.array()).sum());
+  Eigen::MatrixXd AB_tilde = A_tilde * crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
+  I_hh = 0.5 * (I_hh + (AB_tilde.transpose().array() * AB_tilde.array()).sum());
+  //I_hh = 0.5 * (I_hh + (AB_tilde * AB_tilde).diagonal().sum());
 
   double score_h = 0.5 * ((ehat.array().pow(2) * V2dg_inv * D).sum()*pow(s2phat, -1) - (D * diagQ).sum());
   double I_hp = 0.5 * (D * diagQ).sum() * pow(s2phat,-1);
@@ -66,7 +64,6 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
   }
   return test;
 }
-
 
 //' 2d score test statistics for proportion of variation and total variation
 //'
@@ -109,8 +106,9 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
   Eigen::VectorXd score(2);
 
   I(0,0) = (D*D).sum() - 2 * (D*D*diagP).sum(); // tr(QDQD) = tr(D^2) - 2tr(PD^2) + tr(PDPD)
-  Eigen::MatrixXd B_tilde = crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
-  I(0,0) = 0.5 * (I(0,0) + (A_tilde * B_tilde * A_tilde * B_tilde).diagonal().sum());
+  Eigen::MatrixXd AB_tilde = A_tilde * crossProd(X, (X.array().colwise() * (V2dg_inv*D)).matrix());
+  I(0,0) = 0.5 * (I(0,0) + (AB_tilde.transpose().array() * AB_tilde.array()).sum());
+
 
   I(0,1) = I(1,0) = 0.5 * (D * diagQ).sum() * pow(s2p,-1);
   I(1,1)= 0.5 * (n-p) * pow(s2p,-2);
