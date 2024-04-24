@@ -1,8 +1,8 @@
 ---
-title: "my-vignette"
+title: "lmmvar-vignette"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{my-vignette}
+  %\VignetteIndexEntry{lmmvar-vignette}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -15,17 +15,27 @@ knitr::opts_chunk$set(
 )
 ```
 
+In this document, we provide a short tutorial on how to use the $\texttt{lmmvar}$ (Fast and reliable confidence intervals for a variance
+component or proportion) software in R. 
+If you encounter any errors or strange behavior, please report it as an issue at https://github.com/yqzhang5972/lmmvar.
 
-# Installation
+## model set-up
+Suppose $y = X\beta + Zu + e$,
+where $u_{m\times1} \sim N(0, \sigma_g^2/m)$, $e_{n\times1} \sim N(0, \sigma_e^2I_n)$, so that
+$$y \sim N(X\beta, \sigma_g^2K+\sigma_e^2I_n)$$
+with $K = ZZ^T/m$. 
+
+Now we would like to estimate test statistic and confidence interval for $h^2 = \sigma_g^2 / (\sigma_g^2+\sigma_e^2)$ (heritability) and $\sigma_p^2 = \sigma_g^2+\sigma_e^2$.
+
+## Installation
 ```{r}
+# install.packages("devtools")
+# library(devtools)
+# devtools::install_github("yqzhang5972/lmmvar")
 library(lmmvar)
 ```
-$$y = X\beta + Zu + e$$
-where $u_{m\times1} \sim N(0, \frac{\sigma_g^2}{m})$, $e_{n\times1} \sim N(0, \sigma_e^2I_n)$, which means
-$$y \sim N(X\beta, \sigma_g^2K+\sigma_e^2I_n)$$
-with $K = \frac{ZZ^T}{m}$.
 
-# simulation
+## Example
 ```{r}
 # simulate y = X\beta + Zu + e
 simData <- function(sigma2_g, sigma2_e = 1, X, Z) {  
@@ -38,7 +48,7 @@ simData <- function(sigma2_g, sigma2_e = 1, X, Z) {
   y = X %*% beta + Z %*% u + e
   return(y)
 }
-# function to simulate Z
+# simulate Z
 simZ <- function(m,n) {
   S <- matrix(0, nrow = n, ncol = n)
   for (kk in 1:n) {
@@ -51,10 +61,8 @@ simZ <- function(m,n) {
   Z <- SSqrt %*% matrix(rnorm(n*m), nrow = n)
   return(Z)
 }
-```
 
-### example
-```{r}
+
 N = 10000
 n=100
 p=10
@@ -67,18 +75,34 @@ X = matrix(rnorm(n*p, 0, 1), nrow = n)   # simulate a n by p design matrix
 Z <- simZ(m, n) # simulate z
 y = simData(sigma2_g = h2*s2p, sigma2_e = (1-h2)*s2p, X, Z)  # simulate y = X\beta + Zu + e
 K = Z %*% t(Z) / m  
-# eigen decomp K to diagonal
-eigen_decomp = eigen(K, symmetric = T)
-V = eigen_decomp$vectors
-lambda = eigen_decomp$values   # K's eigenvalues
+
+eigen_decomp = eigen(K, symmetric = T) # eigen-decomposition of K
+V = eigen_decomp$vectors       # finding K's eigenvectors
+lambda = eigen_decomp$values   # finding K's eigenvalues
 Xnew = crossprod(V, X)         # transform X with V'X
 ynew = crossprod(V, y)         # transform y with V'y
 ```
 
-```{r}
-varRatioTest1d(h2, ynew, Xnew, lambda)   # score test statistic of h2 at true value
-varRatioTest2d(h2, s2p, ynew, Xnew, lambda) # score test statistic of (h2,sigma^2_p) at true value
-confInv(c(1e-4,1-1e-4), ynew, Xnew, lambda) # 95% confidence interval of h2
-confReg(c(1e-4,1-1e-4), c(1e-4,3), ynew, Xnew, lambda) # matrix of test statistics at a grid of h2 from 0.0001 to 0.9999 and sigma^2_p from 0.0001 to 3.
+## Compute the 1d and 2d test statistics, 1d confidence interval and 2d test statistics matrix
+```{r message=FALSE}
+# score test statistic of h2 at true value
+varRatioTest1d(h2, ynew, Xnew, lambda)   
+# score test statistic of (h2,sigma^2_p) at true value
+varRatioTest2d(h2, s2p, ynew, Xnew, lambda) 
+# 95% confidence interval of h2 treating sigma^2_p as nuisance parameter
+confInv(ynew, Xnew, lambda) 
+
+# matrix of test statistics at a grid of h2 from 0 to 1 and sigma^2_p from 0.0001 to 3.
+cr <- confReg(range_p = c(1e-4,3), ynew, Xnew, lambda) 
+library(ggplot2)
+library(dplyr)
+library(latex2exp)
+data.frame(p = seq(1e-4,3, length.out = 200)[30:150], teststatistic = cr[100,30:150]) %>%
+  ggplot(aes(x = p, y = teststatistic))  + theme_bw() + #geom_point(size=0.8) +
+  geom_line() + xlab(TeX("$sigma^2_p$")) + ylab("Test-statistic") +
+  ggtitle(TeX("$h^2=0.5$")) + theme(plot.title = element_text(hjust = 0.5)) +
+  geom_hline(yintercept=qchisq(0.95, 1), color = "red")+
+  theme(axis.title=element_text(size=16), 
+        plot.title = element_text(size = 18), axis.text = element_text(size=12))
 ```
 
