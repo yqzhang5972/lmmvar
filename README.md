@@ -36,7 +36,7 @@ of April 2024, this was the following (in bibtex):
 ### Vignette
 
 Please visit [this example
-page](https://ajmolstad.github.io/docs/SpPDCCExample.html) for details
+page](http://koekvall.github.io/files/lmmvar-vignette.html) for details
 on implementation and usage.
 
 ### Reproducing simulation study results

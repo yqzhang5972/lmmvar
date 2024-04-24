@@ -33,7 +33,7 @@ Please cite the most recent version of the article mentioned above. As of April 
 }
 ```
 ### Vignette
-Please visit [this example page](https://ajmolstad.github.io/docs/SpPDCCExample.html) for details on implementation and usage. 
+Please visit [this example page](http://koekvall.github.io/files/lmmvar-vignette.html) for details on implementation and usage. 
 
 
 ### Reproducing simulation study results
