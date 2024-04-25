@@ -6,13 +6,12 @@ Date: 2024-04-25
 Authors@R: c(
     person("Yiqiao", "Zhang", email = "yiqiaozhang@ufl.edu", role = "cre"),
     person("Karl Oskar", "Ekvall", email = "k.o.ekvall@gmail.com", role = "ctb"))
-Description: Computes the score standardized by expected information test statitics and confidence intervals for a variance component or proportion.
+Description: Computes the score standardized by expected information test-statitics and confidence intervals for a variance component or proportion.
 License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.11), RcppEigen
 LinkingTo: Rcpp, RcppEigen
 URL: https://github.com/yqzhang5972/lmmvar
 BugReports: https://github.com/yqzhang5972/lmmvar/issues
-RoxygenNote: 7.2.3
 Encoding: UTF-8
 Suggests: 
     knitr,
@@ -21,6 +20,4 @@ Suggests:
     dplyr,
     ggplot2
 VignetteBuilder: knitr
-
-
-
+RoxygenNote: 7.3.1
