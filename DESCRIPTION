@@ -1,11 +1,11 @@
 Package: lmmvar
 Type: Package
-Title: Score test on proportion of variation in a linear mixed model
+Title: Test and confidence intervals for variance component or proportion
 Version: 1.0
-Date: 2023-09-19
-Author: Who wrote it
-Maintainer: Who to complain to <yourfault@somewhere.net>
-Description: Compute score test statistic on proportion and total variation in a linear mixed model, give a confidence interval of proportion of variation.
+Date: 2024-04-25
+Author: Yiqiao Zhang
+Maintainer: Yiqiao Zhang <yiqiaozhang@ufl.edu>
+Description: Computes the score standardized by expected information test statitics and confidence intervals for a variance component or proportion
 License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.11), RcppEigen
 LinkingTo: Rcpp, RcppEigen
@@ -15,7 +15,10 @@ RoxygenNote: 7.2.3
 Encoding: UTF-8
 Suggests: 
     knitr,
-    rmarkdown
+    rmarkdown,
+    latex2exp,
+    dplyr,
+    ggplot2
 VignetteBuilder: knitr
 
 
