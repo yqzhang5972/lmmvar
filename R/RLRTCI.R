@@ -1,6 +1,12 @@
 library(Rcpp)
 # sourceCpp("RLRTSim.cpp")
 
+# Take lower triangle Cholesky decomposition L of A and compute solve(A, B)
+chol_solve <- function(L, B){
+  forwardsolve(L, forwardsolve(L, B), transp = TRUE)
+}
+
+
 #'@import Rcpp
 #'@importFrom stats rchisq
 #'@export RLRTSim
@@ -70,37 +76,38 @@ RLRTSim <- function(X, ZSigmasqrt, lambda0 = NA, nsim = 10000, log.grid.hi = 8, 
 
 # negative log-likelihood function for new parameterization
 neg_loglik2_repar <- function(par, X, y, eigens) { # par = lambda, sigma^2_e
-  n = nrow(X)
-  Sigma = (par[1]*eigens + rep(1,n)) * par[2]
-  Sigma_inv = 1 / Sigma
-  XSX = crossprod(X, Sigma_inv * X)
-  XSX_inv = chol2inv(chol(XSX))
-  betahat = XSX_inv %*% crossprod(X, Sigma_inv * y)
-  l <- sum(log(Sigma)) / 2 +
-    determinant(XSX)$modulus[1] / 2 +
-    sum((y-X%*%betahat) * Sigma_inv * (y-X%*%betahat)) / 2
+  n <- nrow(X)
+  Sigma <- (par[1] * eigens + rep(1, n)) * par[2]
+  Sigma_inv <- 1 / Sigma
+  XSX <- crossprod(X, Sigma_inv * X)
+  XSX_chol <- chol(XSX)
+  betahat <- chol_solve(t(XSX_chol), crossprod(X, Sigma_inv * y))
+  y <- y - X %*% betahat
+  l <- sum(log(Sigma)) / 2 + sum(log(diag(XSX_chol))) + sum(y^2 * Sigma_inv) / 2
   return(l)
 }
 
 neg_loglik1_repar <- function(par, X, y, eigens) { # par = lambda0
-  n = nrow(X)
-  p = ncol(X)
-  Sigma = (par*eigens + rep(1,n))     # \Sigma / sigma_e^2
-  Sigma_inv = 1 / Sigma
-  XSX = crossprod(X, Sigma_inv * X)
-  XSX_inv = chol2inv(chol(XSX))
-  betahat = XSX_inv %*% crossprod(X, Sigma_inv * y)
-  sigma2ehat = crossprod(y-X%*%betahat, Sigma_inv * (y-X%*%betahat)) / (n-p)
-  l <- sum(log(Sigma)) / 2 + (n-p) * log(sigma2ehat) / 2 +
-    determinant(XSX)$modulus[1] / 2 +
-    sum((y-X%*%betahat) * Sigma_inv * (y-X%*%betahat)) / 2 / sigma2ehat
+  n <- nrow(X)
+  p <- ncol(X)
+  Sigma <- (par * eigens + rep(1, n))     # \Sigma / sigma_e^2
+  Sigma_inv <- 1 / Sigma
+  XSX <- crossprod(X, Sigma_inv * X)
+  XSX_chol <- chol(XSX)
+  betahat <- chol_solve(t(XSX_chol), crossprod(X, Sigma_inv * y))
+  y <- y - X %*% betahat
+  sigma2ehat <- crossprod(y, Sigma_inv * y) / (n - p)
+  l <- sum(log(Sigma)) / 2 + (n - p) * log(sigma2ehat) / 2 +
+    # determinant(XSX)$modulus[1] / 2 +
+    sum(log(diag(XSX_chol))) + 
+    sum(y^2 * Sigma_inv) / (2 * sigma2ehat)
   return(l)
 }
 
 # function of wald and LRT test statistics for multi-core computing, k: iteration
 rlrt <- function(Xnew, ynew, eigens, lambda0) {
   # Ha
-  opt = optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew, eigens=eigens, method = "L-BFGS-B", lower = c(1e-4, 1e-4), upper = c(Inf, Inf)) # , control = list(trace = 10)
+  opt <- optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew, eigens=eigens, method = "L-BFGS-B", lower = c(1e-4, 1e-4), upper = c(Inf, Inf)) # , control = list(trace = 10)
   # H0
   neglog <- neg_loglik1_repar(lambda0, X=Xnew, y=ynew, eigens=eigens)
   rlrt <- 2 * (neglog - opt$value)
