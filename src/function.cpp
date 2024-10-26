@@ -219,13 +219,13 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
       dist = b - a;
       iter++;
       if (iter > maxiter) {
-        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for minimum tried");
+        Rcpp::warning("Warning: reached maximum iterations searching for minimum");
         break;
       }
     }
     if (test_a > critPoint) {
       if (test_b > critPoint) {  // all test statistics larger than qchisq, no root
-        Rcpp::warning("Warning: no test statistics under threshold, return NA");
+        Rcpp::warning("Warning: no test statistic under threshold, returning NA");
         return result;
       }
     }
@@ -247,7 +247,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
       mid1 = (lower+upper) / 2;
       iter++;
       if (iter > maxiter) {
-        Rcpp::warning("Warning: Tolerance too low, maximum iteration of searching for lower bound tried");
+        Rcpp::warning("Warning: reached maximum iterations searching for lower bound");
         break;
       }
     }
@@ -351,7 +351,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' eigenvalues of the variance component covariance matrix (see details).
 //' @param grid The number of grid points in each interval, meaning the total number
 //' of points in the grid is the square of `grid`.
-//' @return A `grid`-by-`grid` matrix `CR` with the test-statistic evaluated at the corresponding
+//' @return A `grid`-by-`grid` matrix with the test-statistic evaluated at the corresponding
 //' grid points.
 //' @details
 //' The function assumes the model
