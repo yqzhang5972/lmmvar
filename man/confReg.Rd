@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{confReg}
 \alias{confReg}
-\title{2d score test statistics matrix for a range of proportion of variation and total variation}
+\title{Joint confidence region for proportion of variation, or heritability, and total variation}
 \usage{
 confReg(
   y,
@@ -14,33 +14,46 @@ confReg(
 )
 }
 \arguments{
-\item{y}{A n\eqn{\times}1 vector of observed responses.}
+\item{y}{An vector of length n of observed responses.}
 
-\item{X}{A n\eqn{\times}p predictors matrix, n > p.}
+\item{X}{An n-by-p matrix of predictors, n > p.}
 
-\item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+\item{lambda}{A vector of length n with (non-negative) variances, which are the
+eigenvalues of the variance component covariance matrix (see details).}
 
-\item{range_h}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).}
+\item{range_h}{A vector of length 2 with the boundaries for \eqn{h^2}.
+The endpoints must be in [0,1).}
 
-\item{range_p}{A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values, default is c(0, 1).}
+\item{range_p}{A vector of length 2 giving the boundaries for \eqn{\sigma^2_p}.
+The endpoints must be non-negative.}
 
-\item{grid}{An integer indicates how many different values within the range need to be tested.}
+\item{grid}{The number of grid points in each interval, meaning the total number
+of points in the grid is the square of \code{grid}.}
 }
 \value{
-A matrix showing the score test statistics.
+A \code{grid}-by-\code{grid} matrix \code{CR} with the test-statistic evaluated at the corresponding
+grid points.
 }
 \description{
-{
-for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
-h2 is the proportion of variation of indepedent random component versus the total variation,
-assuming the covariance matrix corresponding to the random component is diagonal (see details).
-}
+Calculate a confidence region by numerically inverting the test-statistic
+implemented in the function \code{varRatioTest2d}. Numerical inversion is done
+by evaluating the test-statistic on a grid (see details).
 }
 \details{
-{ Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
-The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
-the total variation \eqn{\sigma_p = \sigma_g+\sigma_e}, then y can also be seen to follow \eqn{N(X\beta, \sigma_p(h^2\Lambda + (1-h^2)I_n))}.
-\eqn{\Lambda} is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \eqn{\Lambda} as well as X and y.
-By the nature of the model, the support set of h2 has to be in [0,1), and the support set of h2 has to be positive.
-}
+The function assumes the model
+\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+where \eqn{K} is a positive semi-definite (covariance) matrix with
+eigendecomposition \eqn{U\Lambda U^\top}.
+The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
+and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+
+The function creates a set of feasible values for \eqn{h^2} by taking \code{grid}
+evenly spaced points in the interval defined by \code{range_h}. It creates
+a set of feasible values for \eqn{\sigma^2_p} by doing the same thing
+using the interval defined by \code{range_p}. The Cartesian product of these
+two sets is the grid on which the test-statistic is evaluated. A point on
+this grid is in the confidence region if the value of the test-statistic
+is less than the appropriate quantile of the chi-square distribution with
+2 degrees of freedom.
 }

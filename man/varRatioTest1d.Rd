@@ -2,35 +2,45 @@
 % Please edit documentation in R/RcppExports.R
 \name{varRatioTest1d}
 \alias{varRatioTest1d}
-\title{1d score test statistics for proportion of variation}
+\title{Restricted score test-statistic for a proportion of variation, or heritability}
 \usage{
 varRatioTest1d(h2, y, X, lambda, sqRoot = FALSE)
 }
 \arguments{
-\item{h2}{an numeric indicates the desired value of proportion of variation that need to be tested. Needs to be within [0,1).}
+\item{h2}{The null hypothesis value, which needs to be in [0,1).}
 
-\item{y}{A n\eqn{\times}1 vector of observed responses.}
+\item{y}{An vector of length n of observed responses.}
 
-\item{X}{A n\eqn{\times}p predictors matrix, n > p.}
+\item{X}{An n-by-p matrix of predictors, n > p.}
 
-\item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
-
-\item{sqRoot}{A boolean indicates whether to return score test statistic or +/- square root of it (\eqn{I^{-1/2}U}). Default is FALSE.}
+\item{lambda}{A vector of length n with (non-negative) variances, which are the
+eigenvalues of the variance component covariance matrix (see details).}
 }
 \value{
-A single value showing the score test statistics at h2.
+The test-statistic evaluated at \code{h2}.
 }
 \description{
-{
-compute the score test statistic for a proportion of variation of indepedent random component versus total variation in a linear mixed model,
-assuming the covariance matrix corresponding to the random component is diagonal (see details).
-}
+Compute a restricted score test statistic for the proportion of variation due to the
+variance component in a model with one variance component and an error term.
+The function assumes the covariance matrix corresponding to the variance component is
+diagonal which in practice usually means the actual covariance matrix
+has been eigendecomposed and the transformed data are supplied to this
+function (see details). This proportion is known as heritability in some
+applications, and therefore denoted \code{h2} in the code.
 }
 \details{
-{ Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
-The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
-the total variation \eqn{\sigma_p = \sigma_g+\sigma_e}, then y can also be seen to follow \eqn{N(X\beta, \sigma_p(h^2\Lambda + (1-h^2)I_n))}.
-\eqn{\Lambda} is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \eqn{\Lambda} as well as X and y.
-By the nature of the model, the support set of h2 has to be in [0,1). The test statistic follows \eqn{\Chi_1}.
-}
+The function assumes the model
+\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+where \eqn{K} is a positive semi-definite (covariance) matrix with
+eigendecomposition \eqn{U\Lambda U^\top}.
+The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
+and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+The test statistic is approximately chi-square with one degree of
+freedom, even if \code{h2} is small or equal to zero.
+
+If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
+note \eqn{h^2 = \tau / (1 + \tau)}, so the function can be evaluated the
+null hypothesis value for \eqn{\tau}, say \code{tau}, by calling
+\code{varRatioTest1d(h2 = tau / (1 + tau), ...)}.
 }

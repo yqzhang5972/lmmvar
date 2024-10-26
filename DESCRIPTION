@@ -21,4 +21,5 @@ Suggests:
     dplyr,
     ggplot2
 VignetteBuilder: knitr
-RoxygenNote: 7.3.1
+RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)

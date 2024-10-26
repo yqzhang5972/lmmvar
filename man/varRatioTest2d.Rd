@@ -2,36 +2,39 @@
 % Please edit documentation in R/RcppExports.R
 \name{varRatioTest2d}
 \alias{varRatioTest2d}
-\title{2d score test statistics for proportion of variation and total variation}
+\title{Joint restricted score test for a proportion of variation, or heritability, and total variation}
 \usage{
 varRatioTest2d(h2, s2p, y, X, lambda)
 }
 \arguments{
-\item{h2}{an numeric indicates the desired value of proportion of variation that need to be tested. Needs to be within [0,1).}
+\item{h2}{The null hypothesis value of \eqn{h^2}, which needs to be in [0,1).}
 
-\item{s2p}{an positive numeric indicates the desired value of total variation that need to be tested.}
+\item{s2p}{The null hypothesis value of \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.}
 
-\item{y}{A n\eqn{\times}1 vector of observed responses.}
+\item{y}{An vector of length n of observed responses.}
 
-\item{X}{A n\eqn{\times}p predictors matrix, n > p.}
+\item{X}{An n-by-p matrix of predictors, n > p.}
 
-\item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+\item{lambda}{A vector of length n with (non-negative) variances, which are the
+eigenvalues of the variance component covariance matrix (see details).}
 }
 \value{
-A single value showing the score test statistics
+The test-statistic evaluated at \code{h2}.
 }
 \description{
-{
-compute the score test statistic for (h2, s2p), where s2p is the total variationin a linear mixed model;
-h2 is the proportion of variation of indepedent random component versus the total variation,
-assuming the covariance matrix corresponding to the random component is diagonal (see details).
-}
+Compute a joint restricted score test statistic for the total variance and the proportion
+of variation due to the variance component in a model with one variance component and an error term.
+See details below, and the documentation of varRatioTest1d.
 }
 \details{
-{ Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
-The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
-the total variation \eqn{\sigma_p = \sigma_g+\sigma_e}, then y can also be seen to follow \eqn{N(X\beta, \sigma_p(h^2\Lambda + (1-h^2)I_n))}.
-\eqn{\Lambda} is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \eqn{\Lambda} as well as X and y.
-By the nature of the model, the support set of h2 has to be in [0,1). The test statistic follows \eqn{\Chi_2}.
-}
+The function assumes the model
+\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+where \eqn{K} is a positive semi-definite (covariance) matrix with
+eigendecomposition \eqn{U\Lambda U^\top}.
+The parameters in the function are \eqn{h^2=\sigma_g^2/\sigma^2_p} and
+\eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
+The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
+and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+The test statistic is approximately chi-square with two degrees of
+freedom, even if \code{h2} and \code{s2p} are small.
 }

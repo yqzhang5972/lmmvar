@@ -2,7 +2,7 @@
 % Please edit documentation in R/RcppExports.R
 \name{confInv}
 \alias{confInv}
-\title{find confidence interval for h2}
+\title{Confidence interval for a proportion of variation, or heritability}
 \usage{
 confInv(
   y,
@@ -16,36 +16,40 @@ confInv(
 )
 }
 \arguments{
-\item{y}{A n\eqn{\times}1 vector of observed responses.}
+\item{y}{An vector of length n of observed responses.}
 
-\item{X}{A n\eqn{\times}p predictors matrix, n > p.}
+\item{X}{An n-by-p matrix of predictors, n > p.}
 
-\item{lambda}{A n\eqn{\times}1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+\item{lambda}{A vector of length n with (non-negative) variances, which are the
+eigenvalues of the variance component covariance matrix (see details).}
 
-\item{range_h}{A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).}
+\item{range_h}{A vector of length 2 giving the boundaries of the interval
+within which the bisection search is performed. The endpoints must be in [0,1).}
 
-\item{tolerance}{A positive numeric. Differences smaller than tolerance are considered to be equal.}
+\item{tolerance}{A positive scalar with the tolerance used in bisection search.}
 
-\item{confLevel}{A numeric within [0,1]. Confidence level.}
-
-\item{maxiter}{A positive integer. Stop and warning if number of iterations in searching for minimum values or lower, upper bounds exceeds this value.}
-
-\item{type}{A string gives whether a "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".}
+\item{confLevel}{A number in (0, 1) with the level of the confidence interval.}
 }
 \value{
-A vector of length 2 showing confidence interval. NA if no root found.
+A vector of length 2 with endpoints of the confidence interval. NA if no root found.
 }
 \description{
-{ calculating confidence interval for h2,
-which is the proportion of variation of indepedent random component versus the total variation in a linear mixed model.
-Using Ternary search for finding the minimum, and binary search for finding roots.
-}
+Calculate a confidence interval by numerically inverting the test-statistic
+implemented in the function \code{varRatioTest1d}. Numerical inversion is done by
+bisection search for points where the graph of the test-statistic as a function
+of the null-hypothesis value \code{h2} crosses the appropriate quantile.
 }
 \details{
-{ Assuming the linear mixed model follows \eqn{y \sim N(X\beta, \sigma_g\Lambda + \sigma_e I_n)}.
-The proportion of variation of indepedent random component, \eqn{h^2}, is \eqn{\sigma_g / (\sigma_g+\sigma_e)},
-the total variation \eqn{\sigma_p = \sigma_g+\sigma_e}, then y can also be seen to follow \eqn{N(X\beta, \sigma_p(h^2\Lambda + (1-h^2)I_n))}.
-\eqn{\Lambda} is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \eqn{\Lambda} as well as X and y.
-By the nature of the model, the support set of h2 has to be in [0,1), and we assuming the test statistics forms a quasi-convex trend.
-}
+The function assumes the model
+\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+where \eqn{K} is a positive semi-definite (covariance) matrix with
+eigendecomposition \eqn{U\Lambda U^\top}.
+The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
+and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+
+If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
+note \eqn{h^2 = \tau / (1 + \tau)}. Therefore, after running the function
+to compute interval endpoints \code{a < b} for \eqn{h^2}, a confidence interval for \eqn{\tau}
+has lower endpoint \code{a/(1 - a)} and upper endpoint \code{b / (1 - b)}.
 }
