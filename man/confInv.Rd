@@ -9,30 +9,28 @@ confInv(range_h, y, X, lambda, tolerance = 1e-04, confLevel = 0.95)
 \arguments{
 \item{range_h}{A vector of length 2 giving the boundary of range in which to apply searching algorithms. Needs to be within [0,1).}
 
-\item{y}{A n\%*1 vector of observed responses}
+\item{y}{A n\\%*1 vector of observed responses}
 
-\item{X}{A n\%*p predictors matrix, n > p}
+\item{X}{A n\\%*p predictors matrix, n > p}
 
-\item{lambda}{A n\%*1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+\item{lambda}{A n\\%*1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
 
 \item{tolerance}{A positive numeric. Differences smaller than tolerance are considered to be equal.}
 
-\item{confLevel}{A numeric within [0,1]. Confidence level.}
+\item{confLevel}{A numeric within \link{0,1}. Confidence level.}
 }
 \value{
 A vector of length 2 showing confidence interval. NA if no root found.
 }
 \description{
-{ calculating confidence interval for h2,
+calculating confidence interval for h2,
 which is the proportion of variation of indepedent random component versus the total variation in a linear mixed model.
 Using Ternary search for finding the minimum, and binary search for finding roots.
 }
-}
 \details{
-{Assuming the linear mixed model follows y ~ N(X\% beta, \% sigma_g \% Lambda + \% sigma_e I).
-The proportion of variation of indepedent random component, h2, is \% sigma_g / (\% sigma_g+\% sigma_e),
-the total variation \% sigma_p = \% sigma_g+\% sigma_e, then y can also be seen to follow N(X\% beta, \% sigma_p(h2\% Lambda + (1-h2)I)).
-\% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \% Lambda as well as X and y.
+Assuming the linear mixed model follows y ~ N(X\\% beta, \\% sigma_g \\% Lambda + \\% sigma_e I).
+The proportion of variation of indepedent random component, h2, is \\% sigma_g / (\\% sigma_g+\\% sigma_e),
+the total variation \\% sigma_p = \\% sigma_g+\\% sigma_e, then y can also be seen to follow N(X\\% beta, \\% sigma_p(h2\\% Lambda + (1-h2)I)).
+\\% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \\% Lambda as well as X and y.
 By the nature of the model, the support set of h2 has to be in [0,1), and we assuming the test statistics forms a quasi-convex trend.
-}
 }

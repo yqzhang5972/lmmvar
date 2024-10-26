@@ -17,5 +17,5 @@ Useful links:
 
 }
 \author{
-yiqiao zhang <yqzhang5972 at outlook.com>
+yiqiao zhang \if{html}{\out{<yqzhang5972 at outlook.com>}}
 }

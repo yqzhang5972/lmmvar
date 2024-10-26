@@ -11,27 +11,24 @@ varRatioTest2d(h2, s2p, y, X, lambda)
 
 \item{s2p}{an positive numeric indicates the desired value of total variation that need to be tested.}
 
-\item{y}{A n\%*1 vector of observed responses.}
+\item{y}{An n-vector of observed responses.}
 
-\item{X}{A n\%*p predictors matrix, n > p.}
+\item{X}{An n times p matrix of predictors, n > p.}
 
-\item{lambda}{A n\%*1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.}
+\item{lambda}{An n-vector of values in the diagonal matrix Lambda. Values need to be non-negative.}
 }
 \value{
 A single value showing the score test statistics
 }
 \description{
-{
 compute the score test statistic for (h2, s2p), where s2p is the total variationin a linear mixed model;
 h2 is the proportion of variation of indepedent random component versus the total variation,
 assuming the covariance matrix corresponding to the random component is diagonal (see details).
 }
-}
 \details{
-{Assuming the linear mixed model follows y ~ N(X\% beta, \% sigma_g \% Lambda + \% sigma_e I).
-The proportion of variation of indepedent random component, h2, is \% sigma_g / (\% sigma_g+\% sigma_e),
-the total variation \% sigma_p = \% sigma_g+\% sigma_e, then y can also be seen to follow N(X\% beta, \% sigma_p(h2\% Lambda + (1-h2)I)).
-\% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \% Lambda as well as X and y.
-By the nature of the model, the support set of h2 has to be in [0,1). The test statistic follows \% Chi(2).
-}
+Assuming the linear mixed model follows y ~ N(X\\% beta, \\% sigma_g \\% Lambda + \\% sigma_e I).
+The proportion of variation of indepedent random component, h2, is \\% sigma_g / (\\% sigma_g+\\% sigma_e),
+the total variation \\% sigma_p = \\% sigma_g+\\% sigma_e, then y can also be seen to follow N(X\\% beta, \\% sigma_p(h2\\% Lambda + (1-h2)I)).
+\\% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \\% Lambda as well as X and y.
+By the nature of the model, the support set of h2 has to be in [0,1). The test statistic follows \\% Chi(2).
 }

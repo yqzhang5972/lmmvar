@@ -12,6 +12,7 @@ LinkingTo: Rcpp, RcppEigen
 URL: https://github.com/yqzhang5972/lmmvar
 BugReports: https://github.com/yqzhang5972/lmmvar/issues
 RoxygenNote: 7.3.2
+Roxygen: list(markdown = TRUE)
 Encoding: UTF-8
 Suggests: 
     knitr,
