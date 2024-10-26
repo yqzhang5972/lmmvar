@@ -3,7 +3,7 @@ library(Rcpp)
 
 # Take lower triangle Cholesky decomposition L of A and compute solve(A, B)
 chol_solve <- function(L, B){
-  forwardsolve(L, forwardsolve(L, B), transp = TRUE)
+  forwardsolve(L, forwardsolve(L, B), transpose = TRUE)
 }
 
 
@@ -99,7 +99,7 @@ neg_loglik1_repar <- function(par, X, y, eigens) { # par = lambda0
   sigma2ehat <- crossprod(y, Sigma_inv * y) / (n - p)
   l <- sum(log(Sigma)) / 2 + (n - p) * log(sigma2ehat) / 2 +
     # determinant(XSX)$modulus[1] / 2 +
-    sum(log(diag(XSX_chol))) + 
+    sum(log(diag(XSX_chol))) +
     sum(y^2 * Sigma_inv) / (2 * sigma2ehat)
   return(l)
 }
@@ -107,7 +107,7 @@ neg_loglik1_repar <- function(par, X, y, eigens) { # par = lambda0
 # function of wald and LRT test statistics for multi-core computing, k: iteration
 rlrt <- function(Xnew, ynew, eigens, lambda0) {
   # Ha
-  opt <- optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew, eigens=eigens, method = "L-BFGS-B", lower = c(1e-4, 1e-4), upper = c(Inf, Inf)) # , control = list(trace = 10)
+  opt <- stats::optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew, eigens=eigens, method = "L-BFGS-B", lower = c(1e-4, 1e-4), upper = c(Inf, Inf)) # , control = list(trace = 10)
   # H0
   neglog <- neg_loglik1_repar(lambda0, X=Xnew, y=ynew, eigens=eigens)
   rlrt <- 2 * (neglog - opt$value)

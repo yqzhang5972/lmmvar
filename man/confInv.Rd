@@ -29,6 +29,12 @@ within which the bisection search is performed. The endpoints must be in [0,1).}
 \item{tolerance}{A positive scalar with the tolerance used in bisection search.}
 
 \item{confLevel}{A number in (0, 1) with the level of the confidence interval.}
+
+\item{maxiter}{A positive integer. Stop and warning if number of iterations
+in search exceeds this value.}
+
+\item{type}{A string that is either "two-sided", "lower_bd" (lower bound only)
+or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".}
 }
 \value{
 A vector of length 2 with endpoints of the confidence interval. NA if no root found.

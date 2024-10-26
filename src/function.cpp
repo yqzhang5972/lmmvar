@@ -10,8 +10,6 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
   return A.rowwise().sum();
 }
 
-
-
 //' Restricted score test-statistic for a proportion of variation, or heritability
 //'
 //' @description
@@ -28,6 +26,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
+//' @param sqRoot If `true`, return statistic for signed square root statistic. Defaults to `false`.
 //' @return The test-statistic evaluated at `h2`.
 //'
 //' @details
@@ -160,6 +159,11 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' eigenvalues of the variance component covariance matrix (see details).
 //' @param tolerance A positive scalar with the tolerance used in bisection search.
 //' @param confLevel A number in (0, 1) with the level of the confidence interval.
+//' @param maxiter A positive integer. Stop and warning if number of iterations
+//' in search exceeds this value.
+//' @param type A string that is either "two-sided", "lower_bd" (lower bound only)
+//' or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".
+//'
 //' @return A vector of length 2 with endpoints of the confidence interval. NA if no root found.
 //' @details
 //' The function assumes the model

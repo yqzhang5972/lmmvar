@@ -15,6 +15,8 @@ varRatioTest1d(h2, y, X, lambda, sqRoot = FALSE)
 
 \item{lambda}{A vector of length n with (non-negative) variances, which are the
 eigenvalues of the variance component covariance matrix (see details).}
+
+\item{sqRoot}{If \code{true}, return statistic for signed square root statistic. Defaults to \code{false}.}
 }
 \value{
 The test-statistic evaluated at \code{h2}.
