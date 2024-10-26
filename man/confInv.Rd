@@ -8,7 +8,7 @@ confInv(range_h, y, X, lambda, tolerance = 1e-04, confLevel = 0.95)
 }
 \arguments{
 \item{range_h}{A vector of length 2 giving the boundaries of the interval
-where the bisection search is performed. The interval must be a subset of [0,1).}
+within which the bisection search is performed. The endpoints must be in [0,1).}
 
 \item{y}{An vector of length n of observed responses.}
 
@@ -27,7 +27,7 @@ A vector of length 2 with endpoints of the confidence interval. NA if no root fo
 \description{
 Calculate a confidence interval by numerically inverting the test-statistic
 implemented in the function \code{varRatioTest1d}. Numerical inversion is done by
-bisection search of points where the graph of the test-statistic as a function
+bisection search for points where the graph of the test-statistic as a function
 of the null-hypothesis value \code{h2} crosses the appropriate quantile.
 }
 \details{

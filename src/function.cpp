@@ -144,11 +144,11 @@ double varRatioTest2d(double h2, double s2p, Eigen::Map<Eigen::MatrixXd> y, Eige
 //' @description
 //' Calculate a confidence interval by numerically inverting the test-statistic
 //' implemented in the function `varRatioTest1d`. Numerical inversion is done by
-//' bisection search of points where the graph of the test-statistic as a function
+//' bisection search for points where the graph of the test-statistic as a function
 //' of the null-hypothesis value `h2` crosses the appropriate quantile.
 //'
 //' @param range_h A vector of length 2 giving the boundaries of the interval
-//' where the bisection search is performed. The interval must be a subset of [0,1).
+//' within which the bisection search is performed. The endpoints must be in [0,1).
 //' @param y An vector of length n of observed responses.
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
@@ -234,26 +234,43 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eige
   return result;
 }
 
-//' 2d score test statistics matrix for a range of proportion of variation and total variation
+//' Joint confidence region for proportion of variation, or heritability, and total variation
 //'
 //' @description
-//' for a range of h2 and s2p, compute the score test statistic at grid \%* grid different pair of values, where s2p is the total variationin a linear mixed model;
-//' h2 is the proportion of variation of independent random component versus the total variation,
-//' assuming the covariance matrix corresponding to the random component is diagonal (see details).
+//' Calculate a confidence region by numerically inverting the test-statistic
+//' implemented in the function `varRatioTest2d`. Numerical inversion is done
+//' by evaluating the test-statistic on a grid (see details).
 //'
-//' @param range_h A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values. Range needs to be within [0,1).
-//' @param range_p A vector of length 2 giving the boundary of range of h2 which are partitioned into grid different values.
-//' @param y A n\%*1 vector of observed responses.
-//' @param X A n\%*p predictors matrix, n > p.
-//' @param lambda A n\%*1 vector represent values in the diagonal matrix Lambda. Values need to be non-negative.
-//' @param grid An integer indicates how many different values within the range need to be tested.
-//' @return A matrix showing the score test statistics.
+//' @param range_h A vector of length 2 with the boundaries for \eqn{h^2}.
+//' The endpoints must be in [0,1).
+//' @param range_p A vector of length 2 giving the boundaries for \eqn{\sigma^2_p}.
+//' The endpoints must be non-negative.
+//' @param y An vector of length n of observed responses.
+//' @param X An n-by-p matrix of predictors, n > p.
+//' @param lambda A vector of length n with (non-negative) variances, which are the
+//' eigenvalues of the variance component covariance matrix (see details).
+//' @param grid The number of grid points in each interval, meaning the total number
+//' of points in the grid is the square of `grid`.
+//' @return A `grid`-by-`grid` matrix `CR` with the test-statistic evaluated at the corresponding
+//' grid points.
 //' @details
-//' Assuming the linear mixed model follows y ~ N(X\% beta, \% sigma_g \% Lambda + \% sigma_e I).
-//' The proportion of variation of indepedent random component, h2, is \% sigma_g / (\% sigma_g+\% sigma_e),
-//' the total variation \% sigma_p = \% sigma_g+\% sigma_e, then y can also be seen to follow N(X\% beta, \% sigma_p(h2\% Lambda + (1-h2)I)).
-//' \% Lambda is a diagonal matrix which can be achieved by applying eigen decomposition to your non-diagonal SPD \% Lambda as well as X and y.
-//' By the nature of the model, the support set of h2 has to be in [0,1), and the support set of h2 has to be positive.
+//' The function assumes the model
+//' \deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+//' where \eqn{K} is a positive semi-definite (covariance) matrix with
+//' eigendecomposition \eqn{U\Lambda U^\top}.
+//' The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+//' The argument `y` should be \eqn{U^\top y}, the argument `X` is \eqn{U^\top X},
+//' and the argument `lambda` a vector of the diagonal elements of \eqn{\Lambda}.
+//'
+//' The function creates a set of feasible values for \eqn{h^2} by taking `grid`
+//' evenly spaced points in the interval defined by `range_h`. It creates
+//' a set of feasible values for \eqn{\sigma^2_p} by doing the same thing
+//' using the interval defined by `range_p`. The Cartesian product of these
+//' two sets is the grid on which the test-statistic is evaluated. A point on
+//' this grid is in the confidence region if the value of the test-statistic
+//' is less than the appropriate quantile of the chi-square distribution with
+//' 2 degrees of freedom.
+//'
 //' @export
 // [[Rcpp::export]]
 Eigen::MatrixXd confReg(Eigen::Map<Eigen::VectorXd> range_h, Eigen::Map<Eigen::VectorXd> range_p, Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::MatrixXd> X, Eigen::Map<Eigen::MatrixXd> lambda, int grid = 200) {
