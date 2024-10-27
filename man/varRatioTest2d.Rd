@@ -22,7 +22,7 @@ eigenvalues of the variance component covariance matrix (see details).}
 The test-statistic evaluated at \code{h2} and \code{s2p}.
 }
 \description{
-Compute a joint restricted score test statistic for the total variance and the proportion
+Compute a joint restricted score test-statistic for the total variance and the proportion
 of variation due to the variance component in a model with one variance component and an error term.
 See details below, and the documentation of varRatioTest1d.
 }
@@ -37,6 +37,6 @@ common ones using an eigendecomposition.
 The parameters in the function are \eqn{h^2=\sigma_g^2/\sigma^2_p} and
 \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
 
-The test statistic is approximately chi-square with two degrees of
+The test-statistic is approximately chi-square with two degrees of
 freedom, even if \code{h2} and \code{s2p} are small.
 }

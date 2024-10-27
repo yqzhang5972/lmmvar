@@ -22,7 +22,7 @@ eigenvalues of the variance component covariance matrix (see details).}
 The test-statistic evaluated at \code{h2}.
 }
 \description{
-Compute a restricted score test statistic for the proportion of variation due to the
+Compute a restricted score test-statistic for the proportion of variation due to the
 variance component in a model with one variance component and an error term.
 The function assumes the covariance matrix corresponding to the variance component is
 diagonal which in practice usually means the actual covariance matrix
@@ -50,7 +50,7 @@ Note that a linear mixed model with one random effect,
 and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
 \eqn{K = ZZ^\top}.
 
-The test statistic is approximately chi-square with one degree of
+The test-statistic is approximately chi-square with one degree of
 freedom, even if \code{h2} is small or equal to zero.
 
 If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
