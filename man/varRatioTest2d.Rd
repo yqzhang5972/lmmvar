@@ -11,7 +11,7 @@ varRatioTest2d(h2, s2p, y, X, lambda)
 
 \item{s2p}{The null hypothesis value of \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.}
 
-\item{y}{An vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 

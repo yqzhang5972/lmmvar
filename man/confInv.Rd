@@ -16,7 +16,7 @@ confInv(
 )
 }
 \arguments{
-\item{y}{An vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 

@@ -17,7 +17,7 @@ RLRsimCpp <- function(p, m, n, nsim, gridlength, mu, lambdaGrid, lambda0) {
 #' applications, and therefore denoted `h2` in the code.
 #'
 #' @param h2 The null hypothesis value, which needs to be in [0,1).
-#' @param y An vector of length n of observed responses.
+#' @param y A vector of length n of observed responses.
 #' @param X An n-by-p matrix of predictors, n > p.
 #' @param lambda A vector of length n with (non-negative) variances, which are the
 #' eigenvalues of the variance component covariance matrix (see details).
@@ -39,7 +39,7 @@ RLRsimCpp <- function(p, m, n, nsim, gridlength, mu, lambdaGrid, lambda0) {
 #' \eqn{y = U^\top \tilde{y}} and predictors \eqn{X = U^\top \tilde{X}} satisfy
 #' the model the function assumes.
 #'
-#' Note that a linear mixed model with one random effect,
+#' A linear mixed model with one random effect,
 #' \eqn{\tilde{y} = \tilde{X}\beta + ZU + E}, where \eqn{U\sim N(0, \sigma^2_g I_q)}
 #' and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
 #' \eqn{K = ZZ^\top}.
@@ -66,7 +66,7 @@ varRatioTest1d <- function(h2, y, X, lambda, sqRoot = FALSE) {
 #'
 #' @param h2 The null hypothesis value of \eqn{h^2}, which needs to be in [0,1).
 #' @param s2p The null hypothesis value of \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
-#' @param y An vector of length n of observed responses.
+#' @param y A vector of length n of observed responses.
 #' @param X An n-by-p matrix of predictors, n > p.
 #' @param lambda A vector of length n with (non-negative) variances, which are the
 #' eigenvalues of the variance component covariance matrix (see details).
@@ -100,7 +100,7 @@ varRatioTest2d <- function(h2, s2p, y, X, lambda) {
 #'
 #' @param range_h A vector of length 2 giving the boundaries of the interval
 #' within which the bisection search is performed. The endpoints must be in [0,1).
-#' @param y An vector of length n of observed responses.
+#' @param y A vector of length n of observed responses.
 #' @param X An n-by-p matrix of predictors, n > p.
 #' @param lambda A vector of length n with (non-negative) variances, which are the
 #' eigenvalues of the variance component covariance matrix (see details).
@@ -141,8 +141,8 @@ confInv <- function(y, X, lambda, range_h = as.numeric( c(0.0, 1.0)), tolerance 
 #' @param range_h A vector of length 2 with the boundaries for \eqn{h^2}.
 #' The endpoints must be in [0,1).
 #' @param range_p A vector of length 2 giving the boundaries for \eqn{\sigma^2_p}.
-#' The endpoints must be non-negative.
-#' @param y An vector of length n of observed responses.
+#' The endpoints must be positive.
+#' @param y A vector of length n of observed responses.
 #' @param X An n-by-p matrix of predictors, n > p.
 #' @param lambda A vector of length n with (non-negative) variances, which are the
 #' eigenvalues of the variance component covariance matrix (see details).

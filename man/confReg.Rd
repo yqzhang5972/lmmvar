@@ -14,7 +14,7 @@ confReg(
 )
 }
 \arguments{
-\item{y}{An vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 
@@ -25,7 +25,7 @@ eigenvalues of the variance component covariance matrix (see details).}
 The endpoints must be in [0,1).}
 
 \item{range_p}{A vector of length 2 giving the boundaries for \eqn{\sigma^2_p}.
-The endpoints must be non-negative.}
+The endpoints must be positive.}
 
 \item{grid}{The number of grid points in each interval, meaning the total number
 of points in the grid is the square of \code{grid}.}

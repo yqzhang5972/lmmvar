@@ -9,7 +9,7 @@ varRatioTest1d(h2, y, X, lambda, sqRoot = FALSE)
 \arguments{
 \item{h2}{The null hypothesis value, which needs to be in [0,1).}
 
-\item{y}{An vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 
@@ -45,7 +45,7 @@ eigendecomposition \eqn{U\Lambda U^\top}, then the transformed responses
 \eqn{y = U^\top \tilde{y}} and predictors \eqn{X = U^\top \tilde{X}} satisfy
 the model the function assumes.
 
-Note that a linear mixed model with one random effect,
+A linear mixed model with one random effect,
 \eqn{\tilde{y} = \tilde{X}\beta + ZU + E}, where \eqn{U\sim N(0, \sigma^2_g I_q)}
 and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
 \eqn{K = ZZ^\top}.
