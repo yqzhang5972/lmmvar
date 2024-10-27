@@ -50,7 +50,8 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' \eqn{K = ZZ^\top}.
 //'
 //' The test-statistic is approximately chi-square with one degree of
-//' freedom, even if `h2` is small or equal to zero. If `sqRoot = TRUE',
+//' freedom, even if `h2` is small or equal to zero, that is, near or at the
+//' boundary of the parameter set. If `sqRoot = TRUE',
 //' then the test-statistic is approximately standard normal.
 //'
 //' If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
