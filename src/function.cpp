@@ -13,7 +13,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' Restricted score test-statistic for a proportion of variation, or heritability
 //'
 //' @description
-//' Compute a restricted score test statistic for the proportion of variation due to the
+//' Compute a restricted score test-statistic for the proportion of variation due to the
 //' variance component in a model with one variance component and an error term.
 //' The function assumes the covariance matrix corresponding to the variance component is
 //' diagonal which in practice usually means the actual covariance matrix
@@ -49,7 +49,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
 //' \eqn{K = ZZ^\top}.
 //'
-//' The test statistic is approximately chi-square with one degree of
+//' The test-statistic is approximately chi-square with one degree of
 //' freedom, even if `h2` is small or equal to zero.
 //'
 //' If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
@@ -95,7 +95,7 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
 //' Joint restricted score test for a proportion of variation, or heritability, and total variation
 //'
 //' @description
-//' Compute a joint restricted score test statistic for the total variance and the proportion
+//' Compute a joint restricted score test-statistic for the total variance and the proportion
 //' of variation due to the variance component in a model with one variance component and an error term.
 //' See details below, and the documentation of varRatioTest1d.
 //'
@@ -118,7 +118,7 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
 //' The parameters in the function are \eqn{h^2=\sigma_g^2/\sigma^2_p} and
 //' \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
 //'
-//' The test statistic is approximately chi-square with two degrees of
+//' The test-statistic is approximately chi-square with two degrees of
 //' freedom, even if `h2` and `s2p` are small.
 //' @export
 // [[Rcpp::export]]
@@ -239,8 +239,8 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
       }
     }
     if (test_a > critPoint) {
-      if (test_b > critPoint) {  // all test statistics larger than qchisq, no root
-        Rcpp::warning("Warning: no test statistic under threshold, returning NA");
+      if (test_b > critPoint) {  // all test-statistics larger than qchisq, no root
+        Rcpp::warning("Warning: no test-statistic under threshold, returning NA");
         return result;
       }
     }
@@ -292,7 +292,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
   } else if (type == "lower_bd") {
     critPoint = R::qnorm(confLevel, 0.0, 1.0, 1, 0);
     if (varRatioTest1d(range_h[1], y, X, lambda, true) > critPoint) {
-      Rcpp::warning("Warning: no test statistics in the range under threshold, return NA.");
+      Rcpp::warning("Warning: no test-statistics in the range under threshold, return NA.");
       return result;
     }
     // upper bound is set to range_h[1], try to find lower bound
@@ -319,7 +319,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
   } else if (type == "upper_bd") {
     critPoint = R::qnorm(confLevel, 0.0, 1.0, 1, 0);
     if (varRatioTest1d(range_h[1], y, X, lambda, true) < -critPoint) {
-      Rcpp::warning("Warning: no test statistics in the range under threshold, return NA.");
+      Rcpp::warning("Warning: no test-statistics in the range under threshold, return NA.");
       return result;
     }
     //
