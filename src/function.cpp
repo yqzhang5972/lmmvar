@@ -31,12 +31,24 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //'
 //' @details
 //' The function assumes the model
-//' \deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+//' \deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+//' where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+//' supplied in the argument vector `lambda`. The parameter of interest is
+//' \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+//'
+//' Usually this model results
+//' from transformation: If
+//' \deqn{\tilde{y} \sim N(\tilde{X} \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
 //' where \eqn{K} is a positive semi-definite (covariance) matrix with
-//' eigendecomposition \eqn{U\Lambda U^\top}.
-//' The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-//' The argument `y` should be \eqn{U^\top y}, the argument `X` is \eqn{U^\top X},
-//' and the argument `lambda` a vector of the diagonal elements of \eqn{\Lambda}.
+//' eigendecomposition \eqn{U\Lambda U^\top}, then the transformed responses
+//' \eqn{y = U^\top \tilde{y}} and predictors \eqn{X = U^\top \tilde{X}} satisfy
+//' the model the function assumes.
+//'
+//' Note that a linear mixed model with one random effect,
+//' \eqn{\tilde{y} = \tilde{X}\beta + ZU + E}, where \eqn{U\sim N(0, \sigma^2_g I_q)}
+//' and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
+//' \eqn{K = ZZ^\top}.
+//'
 //' The test statistic is approximately chi-square with one degree of
 //' freedom, even if `h2` is small or equal to zero.
 //'
@@ -93,17 +105,19 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
-//' @return The test-statistic evaluated at `h2`.
+//' @return The test-statistic evaluated at `h2` and `s2p`.
 //'
 //' @details
 //' The function assumes the model
-//' \deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-//' where \eqn{K} is a positive semi-definite (covariance) matrix with
-//' eigendecomposition \eqn{U\Lambda U^\top}.
+//' \deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+//' where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+//' supplied in the argument vector `lambda`. See the documentation for
+//' `varRatioTest1d` for how this model often results from transforming more
+//' common ones using an eigendecomposition.
+//'
 //' The parameters in the function are \eqn{h^2=\sigma_g^2/\sigma^2_p} and
 //' \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
-//' The argument `y` should be \eqn{U^\top y}, the argument `X` is \eqn{U^\top X},
-//' and the argument `lambda` a vector of the diagonal elements of \eqn{\Lambda}.
+//'
 //' The test statistic is approximately chi-square with two degrees of
 //' freedom, even if `h2` and `s2p` are small.
 //' @export
@@ -167,12 +181,13 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' @return A vector of length 2 with endpoints of the confidence interval. NA if no root found.
 //' @details
 //' The function assumes the model
-//' \deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-//' where \eqn{K} is a positive semi-definite (covariance) matrix with
-//' eigendecomposition \eqn{U\Lambda U^\top}.
-//' The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-//' The argument `y` should be \eqn{U^\top y}, the argument `X` is \eqn{U^\top X},
-//' and the argument `lambda` a vector of the diagonal elements of \eqn{\Lambda}.
+//' \deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+//' where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+//' supplied in the argument vector `lambda`. See the documentation for
+//' `varRatioTest1d` for how this model often results from transforming more
+//' common ones using an eigendecomposition.
+//'
+//' The parameter of interest is \eqm{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
 //'
 //' If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
 //' note \eqn{h^2 = \tau / (1 + \tau)}. Therefore, after running the function
@@ -355,12 +370,14 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' grid points.
 //' @details
 //' The function assumes the model
-//' \deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-//' where \eqn{K} is a positive semi-definite (covariance) matrix with
-//' eigendecomposition \eqn{U\Lambda U^\top}.
-//' The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-//' The argument `y` should be \eqn{U^\top y}, the argument `X` is \eqn{U^\top X},
-//' and the argument `lambda` a vector of the diagonal elements of \eqn{\Lambda}.
+//' \deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+//' where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+//' supplied in the argument vector `lambda`. See the documentation for
+//' `varRatioTest1d` for how this model often results from transforming more
+//' common ones using an eigendecomposition.
+//'
+//' The parameters of interest are \eqn{h^2 = \sigma^2_g / \sigma^2_p}
+//' and \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
 //'
 //' The function creates a set of feasible values for \eqn{h^2} by taking `grid`
 //' evenly spaced points in the interval defined by `range_h`. It creates

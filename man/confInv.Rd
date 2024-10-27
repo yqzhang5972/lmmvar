@@ -47,12 +47,13 @@ of the null-hypothesis value \code{h2} crosses the appropriate quantile.
 }
 \details{
 The function assumes the model
-\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-where \eqn{K} is a positive semi-definite (covariance) matrix with
-eigendecomposition \eqn{U\Lambda U^\top}.
-The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
-and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+supplied in the argument vector \code{lambda}. See the documentation for
+\code{varRatioTest1d} for how this model often results from transforming more
+common ones using an eigendecomposition.
+
+The parameter of interest is \eqm{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
 
 If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
 note \eqn{h^2 = \tau / (1 + \tau)}. Therefore, after running the function

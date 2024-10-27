@@ -32,12 +32,24 @@ applications, and therefore denoted \code{h2} in the code.
 }
 \details{
 The function assumes the model
-\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
+\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+supplied in the argument vector \code{lambda}. The parameter of interest is
+\eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
+
+Usually this model results
+from transformation: If
+\deqn{\tilde{y} \sim N(\tilde{X} \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
 where \eqn{K} is a positive semi-definite (covariance) matrix with
-eigendecomposition \eqn{U\Lambda U^\top}.
-The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
-and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+eigendecomposition \eqn{U\Lambda U^\top}, then the transformed responses
+\eqn{y = U^\top \tilde{y}} and predictors \eqn{X = U^\top \tilde{X}} satisfy
+the model the function assumes.
+
+Note that a linear mixed model with one random effect,
+\eqn{\tilde{y} = \tilde{X}\beta + ZU + E}, where \eqn{U\sim N(0, \sigma^2_g I_q)}
+and \eqn{E \sim N(0, \sigma^2_e I_n)}, is equivalent to the above with
+\eqn{K = ZZ^\top}.
+
 The test statistic is approximately chi-square with one degree of
 freedom, even if \code{h2} is small or equal to zero.
 

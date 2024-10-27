@@ -1,14 +1,14 @@
 Package: lmmvar
 Type: Package
-Title: Test and confidence intervals for variance component or proportion
+Title: Tests and confidence intervals for a proportion of variability, or heritability
 Version: 1.0
-Date: 2024-04-25
+Date: 2024-10-26
 Authors@R: c(
     person("Yiqiao", "Zhang", email = "yiqiaozhang@ufl.edu", role = "cre"),
     person("Karl Oskar", "Ekvall", email = "k.o.ekvall@gmail.com", role = "ctb"),
-    person("Fabian", "Scheipl", email = "fabian.scheipl@stat.uni-muenchen.de", role = "ctp"))
-Description: Computes the score standardized by expected information test-
-    statistics and confidence intervals for a variance component or proportion.
+    person("Fabian", "Scheipl", email = "fabian.scheipl@stat.uni-muenchen.de", role = "ctb"))
+Description: Compute tests and confidence intervals for a proportion of variability,
+    or heritability, using the restricted score standardized by expected information.
 License: MIT + file LICENSE
 Imports: Rcpp (>= 1.0.11), RcppEigen
 LinkingTo: Rcpp, RcppEigen

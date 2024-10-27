@@ -107,7 +107,10 @@ neg_loglik1_repar <- function(par, X, y, eigens) { # par = lambda0
 # function of wald and LRT test statistics for multi-core computing, k: iteration
 rlrt <- function(Xnew, ynew, eigens, lambda0) {
   # Ha
-  opt <- stats::optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew, eigens=eigens, method = "L-BFGS-B", lower = c(1e-4, 1e-4), upper = c(Inf, Inf)) # , control = list(trace = 10)
+  opt <- stats::optim(par=c(1,1), neg_loglik2_repar, X=Xnew, y=ynew,
+                      eigens=eigens, method = "L-BFGS-B",
+                      lower = c(1e-4, 1e-4),
+                      upper = c(Inf, Inf)) # , control = list(trace = 10)
   # H0
   neglog <- neg_loglik1_repar(lambda0, X=Xnew, y=ynew, eigens=eigens)
   rlrt <- 2 * (neglog - opt$value)

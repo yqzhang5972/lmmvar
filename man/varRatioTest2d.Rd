@@ -19,7 +19,7 @@ varRatioTest2d(h2, s2p, y, X, lambda)
 eigenvalues of the variance component covariance matrix (see details).}
 }
 \value{
-The test-statistic evaluated at \code{h2}.
+The test-statistic evaluated at \code{h2} and \code{s2p}.
 }
 \description{
 Compute a joint restricted score test statistic for the total variance and the proportion
@@ -28,13 +28,15 @@ See details below, and the documentation of varRatioTest1d.
 }
 \details{
 The function assumes the model
-\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-where \eqn{K} is a positive semi-definite (covariance) matrix with
-eigendecomposition \eqn{U\Lambda U^\top}.
+\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+supplied in the argument vector \code{lambda}. See the documentation for
+\code{varRatioTest1d} for how this model often results from transforming more
+common ones using an eigendecomposition.
+
 The parameters in the function are \eqn{h^2=\sigma_g^2/\sigma^2_p} and
 \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
-The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
-and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+
 The test statistic is approximately chi-square with two degrees of
 freedom, even if \code{h2} and \code{s2p} are small.
 }

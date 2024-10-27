@@ -31,7 +31,7 @@ The endpoints must be non-negative.}
 of points in the grid is the square of \code{grid}.}
 }
 \value{
-A \code{grid}-by-\code{grid} matrix \code{CR} with the test-statistic evaluated at the corresponding
+A \code{grid}-by-\code{grid} matrix with the test-statistic evaluated at the corresponding
 grid points.
 }
 \description{
@@ -41,12 +41,14 @@ by evaluating the test-statistic on a grid (see details).
 }
 \details{
 The function assumes the model
-\deqn{y \sim N(X \beta, \sigma_g^2 K + \sigma_e^2 I_n),}
-where \eqn{K} is a positive semi-definite (covariance) matrix with
-eigendecomposition \eqn{U\Lambda U^\top}.
-The parameter of interest is \eqn{h^2=\sigma_g^2/(\sigma^2_g + \sigma^2_e)}.
-The argument \code{y} should be \eqn{U^\top y}, the argument \code{X} is \eqn{U^\top X},
-and the argument \code{lambda} a vector of the diagonal elements of \eqn{\Lambda}.
+\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
+where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+supplied in the argument vector \code{lambda}. See the documentation for
+\code{varRatioTest1d} for how this model often results from transforming more
+common ones using an eigendecomposition.
+
+The parameters of interest are \eqn{h^2 = \sigma^2_g / \sigma^2_p}
+and \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
 
 The function creates a set of feasible values for \eqn{h^2} by taking \code{grid}
 evenly spaced points in the interval defined by \code{range_h}. It creates
