@@ -28,7 +28,7 @@ The endpoints must be in [0,1).}
 The endpoints must be positive.}
 
 \item{grid}{The number of grid points in each interval, meaning the total number
-of points in the grid is the square of \code{grid}.}
+of points in the grid is \code{grid^2}.}
 }
 \value{
 A \code{grid}-by-\code{grid} matrix with the test-statistic evaluated at the corresponding

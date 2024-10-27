@@ -34,7 +34,7 @@ within which the bisection search is performed. The endpoints must be in [0,1).}
 in search exceeds this value.}
 
 \item{type}{A string that is either "two-sided", "lower_bd" (lower bound only)
-or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".}
+or "upper_bd" (upper bound only). Default is "two-sided".}
 }
 \value{
 A vector of length 2 with endpoints of the confidence interval. NA if no root found.
@@ -53,7 +53,7 @@ supplied in the argument vector \code{lambda}. See the documentation for
 \code{varRatioTest1d} for how this model often results from transforming more
 common ones using an eigendecomposition.
 
-The parameter of interest is \eqm{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
+The parameter of interest is \eqn{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
 
 If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
 note \eqn{h^2 = \tau / (1 + \tau)}. Therefore, after running the function

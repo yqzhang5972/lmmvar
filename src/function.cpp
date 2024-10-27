@@ -178,7 +178,7 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' @param maxiter A positive integer. Stop and warning if number of iterations
 //' in search exceeds this value.
 //' @param type A string that is either "two-sided", "lower_bd" (lower bound only)
-//' or "upper_bd" (upper bound only) CI needs to be calculated. Default is "two-sided".
+//' or "upper_bd" (upper bound only). Default is "two-sided".
 //'
 //' @return A vector of length 2 with endpoints of the confidence interval. NA if no root found.
 //' @details
@@ -189,7 +189,7 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //' `varRatioTest1d` for how this model often results from transforming more
 //' common ones using an eigendecomposition.
 //'
-//' The parameter of interest is \eqm{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
+//' The parameter of interest is \eqn{h^2 = \sigma^2_g / (\sigma^2_g + \sigma^2_e).}
 //'
 //' If the parameter of interest is instead \eqn{\tau = \sigma^2_g/\sigma^2_e},
 //' note \eqn{h^2 = \tau / (1 + \tau)}. Therefore, after running the function
@@ -367,7 +367,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
 //' @param grid The number of grid points in each interval, meaning the total number
-//' of points in the grid is the square of `grid`.
+//' of points in the grid is `grid^2`.
 //' @return A `grid`-by-`grid` matrix with the test-statistic evaluated at the corresponding
 //' grid points.
 //' @details
