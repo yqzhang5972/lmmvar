@@ -1,0 +1,7 @@
+Files: inst/include/xxx/*
+Copyright: <year> <name>
+License: <license>
+
+Files: *
+Copyright: <year> <name>
+License: <license>
