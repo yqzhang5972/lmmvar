@@ -17,7 +17,7 @@ RLRTSim <- function(X, ZSigmasqrt, tau0 = NA, nsim = 10000, # ZSigmasqrt n*m, tc
   if (!is.na(seed))
     set.seed(seed)
 
-  h2seq <- seq(0, 1- tolerate, length.out = grid)
+  h2seq <- seq(0, 1 - tolerate, length.out = grid)
   tauGrid <- h2seq / (1-h2seq)
 
   return(

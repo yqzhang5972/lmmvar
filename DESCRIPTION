@@ -4,10 +4,9 @@ Title: Tests and confidence intervals for a proportion of variability, or herita
 Version: 1.0
 Date: 2024-10-26
 Authors@R: c(
-    person("Yiqiao", "Zhang", email = "yiqiaozhang@ufl.edu", role = "cre"),
-    person("Karl Oskar", "Ekvall", email = "k.o.ekvall@gmail.com", role = "ctb"),
-    person("Aaron", "Molstad", email = "amolstad@umn.edu", role = "ctb"),
-    person("Fabian", "Scheipl", email = "fabian.scheipl@stat.uni-muenchen.de", role = "ctb"))
+    person("Yiqiao", "Zhang", email = "yiqiaozhang@ufl.edu", role = c("aut","cre")),
+    person("Karl Oskar", "Ekvall", email = "k.o.ekvall@gmail.com", role = "aut"),
+    person("Aaron", "Molstad", email = "amolstad@umn.edu", role = "ctb"))
 Description: Compute tests and confidence intervals for a proportion of variability,
     or heritability, using the restricted score standardized by expected information.
 License: MIT + file LICENSE
