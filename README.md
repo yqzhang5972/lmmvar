@@ -4,7 +4,7 @@
 An R package for computing test statistics and confidence intervals for
 a variance component or proportion in a linear mixed model using the
 method described in ["Fast and reliable confidence intervals for a
-variance component""](https://arxiv.org/abs/2404.15060).
+variance component"](https://arxiv.org/abs/2404.15060).
 
 This package will be updated sporadically. Please contact
 <yiqiaozhang@ufl.edu> with any questions or comments.
