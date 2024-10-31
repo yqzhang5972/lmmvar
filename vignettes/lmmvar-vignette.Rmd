@@ -142,8 +142,8 @@ varRatioTest2d(h2, s2p, y, X, lambda)
 ### Joint confidence region
 There is also a function to find test statistics for $(h^2, \sigma_p^2)$ evaluated
 on a grid. The default grid range is from 0 to 1 for both $h^2$ and $\sigma_p^2$.
-The output of this function is a matrix containing the different test statistics
-at each grid point, which can be used to find a confidence region.
+The output of this function is a matrix containing the test-statistic evaluated
+at each grid point, which can be used to find a confidence region as below.
 ```{r message=FALSE, fig.width=6, fig.height=4}
 range_h <- c(0.3, 0.95)
 range_p <- c(0.8, 1.5)
