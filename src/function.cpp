@@ -22,7 +22,7 @@ Eigen::VectorXd rowSum(const Eigen::MatrixXd& A) {
 //' applications, and therefore denoted `h2` in the code.
 //'
 //' @param h2 The null hypothesis value, which needs to be in [0,1).
-//' @param y A vector of length n of observed responses.
+//' @param y A vector of length n of observed responses with diagonal covariance matrix.
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
@@ -103,7 +103,7 @@ double varRatioTest1d(const double &h2, Eigen::Map<Eigen::MatrixXd> y, Eigen::Ma
 //'
 //' @param h2 The null hypothesis value of \eqn{h^2}, which needs to be in [0,1).
 //' @param s2p The null hypothesis value of \eqn{\sigma^2_p = \sigma^2_g + \sigma^2_e}.
-//' @param y A vector of length n of observed responses.
+//' @param y A vector of length n of observed responses with diagonal covariance matrix.
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
@@ -169,7 +169,7 @@ double varRatioTest2d(const double &h2, const double &s2p, Eigen::Map<Eigen::Mat
 //'
 //' @param range_h A vector of length 2 giving the boundaries of the interval
 //' within which the bisection search is performed. The endpoints must be in [0,1).
-//' @param y A vector of length n of observed responses.
+//' @param y A vector of length n of observed responses with diagonal covariance matrix.
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).
@@ -362,7 +362,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' The endpoints must be in [0,1).
 //' @param range_p A vector of length 2 giving the boundaries for \eqn{\sigma^2_p}.
 //' The endpoints must be positive.
-//' @param y A vector of length n of observed responses.
+//' @param y A vector of length n of observed responses with diagonal covariance matrix.
 //' @param X An n-by-p matrix of predictors, n > p.
 //' @param lambda A vector of length n with (non-negative) variances, which are the
 //' eigenvalues of the variance component covariance matrix (see details).

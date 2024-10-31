@@ -9,7 +9,7 @@ varRatioTest1d(h2, y, X, lambda, sqRoot = FALSE)
 \arguments{
 \item{h2}{The null hypothesis value, which needs to be in [0,1).}
 
-\item{y}{A vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses with diagonal covariance matrix.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 
