@@ -2,20 +2,24 @@
 % Please edit documentation in R/RLRTCI.R
 \name{RLRTCI}
 \alias{RLRTCI}
-\title{Confidence interval for variance ratio using restricted likelihood ratio test method.}
+\title{Confidence interval for a variance ratio by inverting a restricted likelihood ratio test.}
 \usage{
-RLRTCI(SimDists, ciseq, Xnew, ynew, eigens, alpha = 0.05)
+RLRTCI(SimDists, ciseq, X, y, lambda, alpha = 0.05)
 }
 \arguments{
-\item{SimDists}{A vector giving the simulated distribution of RLRT statistic.}
+\item{SimDists}{A list with simulated RLRT statistics for
+each value to be considered for inclusion in the confidence interval. Usually each element in \code{SimDists} is a vector returned by running the function
+\code{simulate_RLRT}.}
 
-\item{ciseq}{A vector values that need to be checked for \eqn{ sigma^2_g / sigma^2_e}.}
+\item{ciseq}{A vector of potential values of \eqn{\tau} to be included in the confidence interval; the jth element in this vector corresponds to the jth
+element of \code{SimDists}.}
 
-\item{Xnew}{An n-by-p matrix of predictors, n > p. Value needs to be transformed by the same way.}
+\item{X}{An n-by-p matrix of predictors, n > p.}
 
-\item{ynew}{A vector of length n of observed responses. Value needs to be transformed so that covariance matrix of ynew is diagonal.}
+\item{y}{A vector of length n of observed responses.}
 
-\item{eigens}{A vector giving eigen values of covariance matrix of random component in the model.}
+\item{lambda}{A vector with eigenvalues of the variance component covariance
+matrix (see details).}
 
 \item{alpha}{A scalar in \eqn{(0,1)} indicating confidence level, default is 0.05.}
 }
@@ -23,12 +27,17 @@ RLRTCI(SimDists, ciseq, Xnew, ynew, eigens, alpha = 0.05)
 A vector of length 2 with endpoints of the confidence interval.
 }
 \description{
-This function gives a confidence interval based on Simulated distribution and observed RLRT statistics, see reference for method's detail.
+This function computes a confidence interval for \eqn{\tau = \sigma^2_g / \sigma^2_e} (see details) by inverting the restricted
+likelihood ratio test-statistic using the sample quantiles from parametric bootstrap samples of the test-statistics under the null hypothesis.
 }
 \details{
 The function assumes the model
-\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}, where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
-supplied in the argument vector \code{lambda}. The parameter of interest is \eqn{ sigma^2_g / sigma^2_e}.
+\deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),} where \eqn{\Lambda} is a diagonal matrix with non-negative diagonal elements
+supplied in the argument vector \code{lambda}.
+
+The parameter of interest is \eqn{\tau =  \sigma^2_g / \sigma^2_e}.
+
+See documention of \code{varTestRatio1d} for how this model often results from transforming more common ones using an eigendecomposition.
 }
 \references{
 Crainiceanu, C. and Ruppert, D. (2004) Likelihood ratio tests in
