@@ -180,7 +180,7 @@ The output of simulate_RLRT is
 To create a confidence interval, we need to simulate from the distribution
 of the test-statistic, for every potential value of the parameter of interest.
 We have set the `nsim` and `length.out` arguments somewhat low to decrease
-computing time; in practice one can incraese these to increase precision.
+computing time; in practice one can increase these to increase precision.
 ```{r}
 # The potential values of tau
 tau_seq <- seq(from = 0, to = 10, length.out = 100)
