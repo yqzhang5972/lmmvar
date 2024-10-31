@@ -6,12 +6,12 @@ chol_solve <- function(L, B){
 #' Simulate the distribution of the restricted likelihood ratio test statistic for a variance ratio.
 #'
 #' @description
-#' Simulate the distribution of RLRT statistic under the null hypothesis that that \eqn{\tau = \sigma_g^2/\sigma_e^2 = \mathtt{tau0}}. See reference for details.
+#' Simulate the distribution of RLRT statistic in a variance component model under the null hypothesis that that \eqn{\tau = \sigma_g^2/\sigma_e^2 = \mathtt{tau0}} (see details and references).
 #' 
 #' @param X An n-by-p matrix of predictors, n > p.
 #' @param Ksqrt An n-by-m matrix that is a square-root of the variance component covariance matrix (see details).
 #' @param tau0 A scalar null hyothesis in \eqn{[0, \infty)}, default is 0.
-#' @param nsim A positive integer indicating the number of simulations
+#' @param nsim A positive integer indicating the number of simulations.
 #' @param seed A scalar to allow setting seed, default is NA.
 #' @param grid A positive integer with the number of grid points at which to evaluate when inverting the test-statistic to get a confidence region.
 #' @param tol A positive scalar such that \eqn{h^2 = \tau / (1 + \tau) < 1 - \mathtt{tol}}.
@@ -100,7 +100,7 @@ rlrt <- function(Xnew, ynew, eigens, tau0, tol = 1e-4) {
 #' This function computes a confidence interval for \eqn{\tau = \sigma^2_g / \sigma^2_e} (see details) by inverting the restricted
 #' likelihood ratio test-statistic using the sample quantiles from parametric bootstrap samples of the test-statistics under the null hypothesis.
 #' @param SimDists A list with simulated RLRT statistics for
-#' each value to be considered for inclusion in the confidence interval. Usually each element in `SimDists` is a vector returned by running the function
+#' each velement in `ciseq`. Usually each element in `SimDists` is a vector returned by running the function
 #' `simulate_RLRT`.
 #' @param ciseq A vector of potential values of \eqn{\tau} to be included in the confidence interval; the jth element in this vector corresponds to the jth
 #' element of `SimDists`.

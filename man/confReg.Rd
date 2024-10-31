@@ -32,7 +32,7 @@ of points in the grid is \code{grid^2}.}
 }
 \value{
 A \code{grid}-by-\code{grid} matrix with the test-statistic evaluated at the corresponding
-grid points.
+grid points. Rows index \code{h2}, columns index \code{s2p}.
 }
 \description{
 Calculate a confidence region by numerically inverting the test-statistic

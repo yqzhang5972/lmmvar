@@ -8,7 +8,7 @@ RLRTCI(SimDists, ciseq, X, y, lambda, alpha = 0.05)
 }
 \arguments{
 \item{SimDists}{A list with simulated RLRT statistics for
-each value to be considered for inclusion in the confidence interval. Usually each element in \code{SimDists} is a vector returned by running the function
+each velement in \code{ciseq}. Usually each element in \code{SimDists} is a vector returned by running the function
 \code{simulate_RLRT}.}
 
 \item{ciseq}{A vector of potential values of \eqn{\tau} to be included in the confidence interval; the jth element in this vector corresponds to the jth

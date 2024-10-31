@@ -1,0 +1,200 @@
+---
+title: "lmmvar-vignette"
+output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
+vignette: >
+  %\VignetteIndexEntry{lmmvar-vignette}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This document provides a short tutorial on how to use the `lmmvar` package
+which computes confidence regions and intervals in a linear mixed model with one
+random effect, or a variance component model with one variance component and 
+error term. The methods are based on the score and information matrix of the 
+restricted likelihood. Theoretical motivations and additional details are in the
+paper "Fast and reliable confidence intervals for a variance component" by
+Zhang, Ekvall, and Molstad.
+
+If you encounter any errors or strange behavior, please report it as an issue at
+https://github.com/yqzhang5972/lmmvar.
+
+## Installation
+You can install the package from github using devtools:
+```{r}
+# install.packages("devtools")
+# devtools::install_github("yqzhang5972/lmmvar")
+library(lmmvar)
+```
+
+
+## Model
+Suppose a vector of responses $y \in \mathbb{R}^n$ and design matrices 
+$X\in\mathbb{R}^{n\times p}$ and $Z \in \mathbb{R}^{n\times q}$ satisfy, for some
+$\beta \in \mathbb{R}^p$,
+$$
+y = X\beta + ZU + E,
+$$
+where $U \sim N(0, \sigma_g^2I_q)$ and $E \sim N(0, \sigma_e^2I_n)$ are independent.
+Equivalently, with $K = ZZ^\top$, $\sigma^2_p = \sigma^2_g + \sigma^2_e$
+and $h^2 = \sigma^2_g / \sigma^2_p$,
+
+$$
+y \sim N\{X\beta, \sigma_p^2(h^2K+(1-h^2)I_n)\}.
+$$
+
+The parameter $h^2$ have different names depending on the application, including
+for example heritability or the proportion of spatial variability. Another common
+parameter of interest is $\tau = \sigma^2_g / \sigma^2_e$, which is related to $h^2$
+as $h^2 = \tau / (1 + \tau)$.
+
+## Main functions
+There are four main functions in the `lvmmr` package:
+
+  - `varRatioTest1d`: Restricted score test-statistic for a proportion of variation $h^2$, or heritability.
+  - `varRatioTest2d`: Joint restricted score test for a proportion of variation, or heritability, and total variation $(h^2, \sigma_p^2)$.
+  - `confInv`:  Confidence interval for a proportion of variation $h^2$, or heritability.
+  - `confReg`$:  Joint confidence region for proportion of variation, or heritability, and total variation $(h^2, \sigma_p^2)$.
+
+We also provide functions based on restricted likelihood ratio test method (@crainiceanu2004likelihood) to construct confidence interval for the variance ratio $\tau = \sigma_g^2/\sigma_e^2$. The functions are
+
+  - `simulate_RLRT`: Simulated distribution of the restricted likelihood ratio test statistic of variance ratio $\tau = \sigma_g^2/\sigma_e^2$.
+  - `RLRTCI`: Confidence interval for variance ratio $\tau = \sigma_g^2/\sigma_e^2$ based on inverting the restricted likelihood ratio test using
+  sample quantiles from parametric boostrapo samples under the null hypothesis.
+
+
+## Example
+### Set up
+Let's look at an simulation example. We set the true $h^2$ to be 0.5 and $\sigma_p^2$ to be 1, and $(n, p) = (500, 10)$.
+Since the restricted likelihood does not depend on the true $\beta$, we set it
+equal to zero for simplicity.
+```{r}
+# -----------------------------------   
+# Simulate data
+# ----------------------------------- 
+set.seed(0)
+n <- 500 
+p <- 10
+h2 <- 0.5
+s2p <- 1
+K <- 0.5^abs(outer(1:n, 1:n, "-")) # AR(1)
+X <- matrix(rnorm(n * p), nrow = n)
+Ksqrt <- t(chol(K)) # This ensures tcrossprod(Ksqrt) = K, so Z = Ksqrt
+
+# This is our generated response vector
+y <- Ksqrt %*% rnorm(n, sd = sqrt(h2)) + rnorm(n, sd = sqrt(1 - h2))
+```
+
+Now let's see how to use \texttt{confInv} to construct a confidence interval for $h^2$. The arguments to the function are 
+
+  -  `y`: A vector of length n of observed responses with diagonal covariance matrix.
+  -  `X`: An n-by-p matrix of predictors, n > p.
+  -  `lambda`: A vector of length n with (non-negative) variances, which are the eigenvalues of the variance component covariance matrix.
+  -  `tolerance`: A positive scalar with the tolerance used in bisection search, default is 1e-4.
+  -  `confLevel`: A number in (0, 1) with the level of the confidence interval, default is 0.95.
+  -  `maxiter`: A positive integer. Stop and warning if number of iterations in search exceeds this value, default is 50.
+  -  `type`: A string that is either "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only), default is "two-sided".
+
+The function \texttt{confInv} requires the argument `y` to have diagonal covariance matrix
+$\sigma^2_p\{h^2\Lambda + (1 - h^2)I_n\}$. This is not true for the `y` we generated,
+but we can transform it to satisfy the requirement: if $K = V\Lambda V^\top$ by
+eigendecomposition, then $$V^\top y \sim N\{V^\top X\beta, \sigma_p^2(h^2\Lambda+(1-h^2)I_n)\}.$$
+
+```{r}
+# ------------------------------------------------------------------------------
+# Transform X and y to make the covariance matrix diagonal
+# ------------------------------------------------------------------------------
+eigen_decomp = eigen(K, symmetric = T)
+V = eigen_decomp$vectors               
+lambda = eigen_decomp$values
+
+X = crossprod(V, X)
+y = crossprod(V, y)
+```
+
+
+### Score-based confidence interval
+With the transformed data, we can calculate a confidence interval for $h^2$:
+```{r}
+confInv(y, X, lambda)
+```
+
+### Score test-statistic
+
+If rather than to compute a confidence interval, we wanted to test a particular
+null hypothesis, we can evaluate the test-statistic for $h^2$, or the joint test-
+statistic for $(h^2, \sigma^2_p)$ at the null hypotheses:
+```{r message=FALSE}
+# Score test-statistic of h2 at true value
+varRatioTest1d(h2, y, X, lambda)   
+# Score test-statistic of (h2,sigma^2_p) at true value
+varRatioTest2d(h2, s2p, y, X, lambda) 
+```
+
+### Joint confidence region
+There is also a function to find test statistics for $(h^2, \sigma_p^2)$ evaluated
+on a grid. The default grid range is from 0 to 1 for both $h^2$ and $\sigma_p^2$.
+The output of this function is a matrix containing the different test statistics
+at each grid point, which can be used to find a confidence region.
+```{r message=FALSE, fig.width=6, fig.height=4}
+range_h <- c(0.3, 0.95)
+range_p <- c(0.8, 1.5)
+n_grid <- 50
+cr <- confReg(y, X, lambda, range_h = range_h, range_p = range_p, grid = n_grid)  
+dim(cr)
+
+# Plot the contours of the test-statistic
+h2_vals <- seq(from = range_h[1], to = range_h[2], length.out = n_grid)
+s2p_vals <- seq(from = range_p[1], to = range_p[2], length.out = n_grid)
+contour(x = s2p_vals, y = h2_vals, z = cr,
+        levels = qchisq(c(0.9, 0.95, 0.99), df = 2), # Conf. levels contours
+        labels = c(0.9, 0.95, 0.99),
+        ylab = latex2exp::TeX("$h^2$"),
+        xlab = latex2exp::TeX("$\\sigma^2_p$"))
+
+```
+
+### Confidence interval using the restricted likelihood ratio
+This function gives confidence interval for $\tau = \sigma^2_g / \sigma^2_e$ based
+on RLRT method (@crainiceanu2004likelihood). First we need to find simulated
+distribution of RLRT statistic using simulate_RLRT. The input of simulate_RLRT is
+
+  -  `X`: An n-by-p matrix of predictors, n > p.
+  -  `Ksqrt`: A matrix which is the square root of the variance component
+      covariance matrix.
+  -  `tau0`: A positive scalar indicates the value at which we want to make the
+      hypothesis test.
+  
+The output of simulate_RLRT is 
+
+  -  A vector with the length of number of simulation.
+
+To create a confidence interval, we need to simulate from the distribution
+of the test-statistic, for every potential value of the parameter of interest.
+We have set the `nsim` and `length.out` arguments somewhat low to decrease
+computing time; in practice one can incraese these to increase precision.
+```{r}
+# The potential values of tau
+tau_seq <- seq(from = 0, to = 10, length.out = 100)
+
+# Simulate the distribution of the test-statistics for every value in tau_seq
+SimDists <- list()
+for (j in 1:length(tau_seq)) {
+  SimDists[[j]] <- simulate_RLRT(X, Ksqrt, tau0 = tau_seq[j], nsim = 500)
+}
+tau_int <- RLRTCI(SimDists = SimDists, ciseq = tau_seq, X = X, y = y,
+                  lambda = lambda)
+# CI for tau
+tau_int
+# Corresponding interval for h2
+tau_int / (1 + tau_int)
+```
+

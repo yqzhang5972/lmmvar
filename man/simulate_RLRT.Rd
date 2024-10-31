@@ -21,7 +21,7 @@ simulate_RLRT(
 
 \item{tau0}{A scalar null hyothesis in \eqn{[0, \infty)}, default is 0.}
 
-\item{nsim}{A positive integer indicating the number of simulations}
+\item{nsim}{A positive integer indicating the number of simulations.}
 
 \item{seed}{A scalar to allow setting seed, default is NA.}
 
@@ -33,7 +33,7 @@ simulate_RLRT(
 A vector of length \code{nsim} of simulated values of the test-statistic.
 }
 \description{
-Simulate the distribution of RLRT statistic under the null hypothesis that that \eqn{\tau = \sigma_g^2/\sigma_e^2 = \mathtt{tau0}}. See reference for details.
+Simulate the distribution of RLRT statistic in a variance component model under the null hypothesis that that \eqn{\tau = \sigma_g^2/\sigma_e^2 = \mathtt{tau0}} (see details and references).
 }
 \details{
 The function assumes the model

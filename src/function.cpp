@@ -369,7 +369,7 @@ Rcpp::NumericVector confInv(Eigen::Map<Eigen::MatrixXd> y, Eigen::Map<Eigen::Mat
 //' @param grid The number of grid points in each interval, meaning the total number
 //' of points in the grid is `grid^2`.
 //' @return A `grid`-by-`grid` matrix with the test-statistic evaluated at the corresponding
-//' grid points.
+//' grid points. Rows index `h2`, columns index `s2p`.
 //' @details
 //' The function assumes the model
 //' \deqn{y \sim N(X \beta, \sigma_g^2 \Lambda + \sigma_e^2 I_n),}
