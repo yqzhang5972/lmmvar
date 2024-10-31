@@ -1,6 +1,7 @@
 ---
 title: "lmmvar-vignette"
 output: rmarkdown::html_vignette
+bibliography: REFERENCES.bib
 vignette: >
   %\VignetteIndexEntry{lmmvar-vignette}
   %\VignetteEngine{knitr::rmarkdown}
@@ -19,15 +20,8 @@ In this document, we provide a short tutorial on how to use the $\texttt{lmmvar}
 component or proportion) software in R. 
 If you encounter any errors or strange behavior, please report it as an issue at https://github.com/yqzhang5972/lmmvar.
 
-## model set-up
-Suppose $y = X\beta + Zu + e$,
-where $u_{m\times1} \sim N(0, \sigma_g^2/m)$, $e_{n\times1} \sim N(0, \sigma_e^2I_n)$, so that
-$$y \sim N(X\beta, \sigma_g^2K+\sigma_e^2I_n)$$
-with $K = ZZ^T/m$. 
-
-Now we would like to estimate test statistic and confidence interval for $h^2 = \sigma_g^2 / (\sigma_g^2+\sigma_e^2)$ (heritability) and $\sigma_p^2 = \sigma_g^2+\sigma_e^2$.
-
 ## Installation
+You can install the package from github using devtool:
 ```{r}
 # install.packages("devtools")
 # library(devtools)
@@ -35,9 +29,38 @@ Now we would like to estimate test statistic and confidence interval for $h^2 = 
 library(lmmvar)
 ```
 
+
+## Setting
+Suppose a vector of response $y \in \mathbb{R}^n$, a design matrix $X\in\mathbb{R}^{n\times p}$, a random effect matrix $Z \in \mathbb{R}^{n\times m}$, for some $\beta \in \mathbb{R}^p$, satisfy
+$$
+y = X\beta + Zu + e
+$$,
+where $u_{m\times1} \sim N(0, \sigma_g^2/m)$ and $e_{n\times1} \sim N(0, \sigma_e^2I_n)$ are independent. Let $K = ZZ^T/m$ (kinship matrix), $h^2 = \sigma_g^2 / (\sigma_g^2+\sigma_e^2)$ (heritability) and $\sigma_p^2 = \sigma_g^2+\sigma_e^2$, it then follows that
+$$
+y \sim N(X\beta, \sigma_p^2(h^2K+(1-h^2)I_n))
+$$.
+
+## Main functions
+There are four main functions in the R package. They are 
+
+  - $\texttt{varRatioTest1d}$: Restricted score test-statistic for a proportion of variation $h^2$, or heritability.
+  - $\texttt{varRatioTest2d}$: Joint restricted score test for a proportion of variation, or heritability, and total variation $(h^2, \sigma_p^2)^T$.
+  - $\texttt{confInv}$:  Confidence interval for a proportion of variation $h^2$, or heritability.
+  - $\texttt{confReg}$:  Joint confidence region for proportion of variation, or heritability, and total variation $(h^2, \sigma_p^2)^T$.
+
+We also provide functions based on restricted likelihood ratio test method (@crainiceanu2004likelihood) to construct confidence interval for variance ratio $\sigma_g^2/\sigma_e^2$. The functions are
+
+  - $\texttt{RLRTSim}$: Simulated distribution of the restricted likelihood ratio test statistic of variance ratio $\sigma_g^2/\sigma_e^2$.
+  - $\texttt{RLRTCI}$: Confidence interval for variance ratio $\sigma_g^2/\sigma_e^2$ based on Simulated distribution and observed RLRT statistics.
+
+
 ## Example
+### Data set up
+Let's look at an example based on simulation data. 
 ```{r}
-# simulate y = X\beta + Zu + e
+# -----------------------------------------   
+# function to simulate y = X\beta + Zu + e
+# -----------------------------------------   
 simData <- function(sigma2_g, sigma2_e = 1, X, Z) {  
   n = dim(X)[1]
   p = dim(X)[2]
@@ -62,47 +85,95 @@ simZ <- function(m,n) {
   return(Z)
 }
 
-
-N = 10000
-n=100
+# -----------------------------------   
+# hyperparameters and data simulation
+# ----------------------------------- 
+N = 10000 
+n=100   
 p=10
 m=1000
 h2 = 0.5
 s2p = 1 
 
 set.seed(0)
-X = matrix(rnorm(n*p, 0, 1), nrow = n)   # simulate a n by p design matrix
-Z <- simZ(m, n) # simulate z
+X = matrix(rnorm(n*p, 0, 1), nrow = n)   # simulate a n by p design matrix X
+Z <- simZ(m, n)                          # simulate z
 y = simData(sigma2_g = h2*s2p, sigma2_e = (1-h2)*s2p, X, Z)  # simulate y = X\beta + Zu + e
 K = Z %*% t(Z) / m  
-
-eigen_decomp = eigen(K, symmetric = T) # eigen-decomposition of K
-V = eigen_decomp$vectors       # finding K's eigenvectors
-lambda = eigen_decomp$values   # finding K's eigenvalues
-Xnew = crossprod(V, X)         # transform X with V'X
-ynew = crossprod(V, y)         # transform y with V'y
 ```
 
-## Compute the 1d and 2d test statistics, 1d confidence interval and 2d test statistics matrix
+Now let's show how to use \texttt{confInv} to construct a confidence interval for $h^2$. Firstly, the arguments for the function are 
+
+  -  $\texttt{y}$: A vector of length n of observed responses with diagonal covariance matrix.
+  -  $\texttt{X}$: An n-by-p matrix of predictors, n > p.
+  -  $\texttt{lambda}$: A vector of length n with (non-negative) variances, which are the eigenvalues of the variance component covariance matrix.
+  -  $\texttt{tolerance}$: A positive scalar with the tolerance used in bisection search, default is 1e-4.
+  -  $\texttt{confLevel}$: A number in (0, 1) with the level of the confidence interval, default is 0.95.
+  -  $\texttt{maxiter}$: A positive integer. Stop and warning if number of iterations in search exceeds this value, default is 50.
+  -  $\texttt{type}$: A string that is either "two-sided", "lower_bd" (lower bound only) or "upper_bd" (upper bound only), default is "two-sided".
+
+Since \texttt{confInv} requires observation variable $y$ has diagonal covariance (so is varRatioTest1d, varRatioTest1d, confReg and RLRTCI), it is needed to find eigen values and eigen vectors of K, then transform X and y accordingly, so that $y_{new} = V^Ty \sim N(V^TX\beta, \sigma_p^2(h^2\Lambda+(1-h^2)I_n))$, where $K = V\Lambda V^T$ is the eigen decomposition and $\Lambda$ is diagonal.
+
+```{r}
+eigen_decomp = eigen(K, symmetric = T) # eigen-decomposition of K
+V = eigen_decomp$vectors               # finding K's eigenvectors
+lambda = eigen_decomp$values           # finding K's eigenvalues
+
+# --------------------------------------------------------------------------------   
+# Required steps: transform X and y such that ynew's covariance matrix is diagonal
+# --------------------------------------------------------------------------------
+Xnew = crossprod(V, X)                 # transform X with V'X
+ynew = crossprod(V, y)                 # transform y with V'y
+```
+
+### Find confidence interval for heritability
+```{r}
+confInv(ynew, Xnew, lambda)
+```
+
+### Compute the 1d and 2d test statistics
+We now show how to find test statistics for $h^2$ or $(h^2, \sigma_p^2)^T$ respectively.
 ```{r message=FALSE}
 # score test statistic of h2 at true value
 varRatioTest1d(h2, ynew, Xnew, lambda)   
 # score test statistic of (h2,sigma^2_p) at true value
 varRatioTest2d(h2, s2p, ynew, Xnew, lambda) 
-# 95% confidence interval of h2 treating sigma^2_p as nuisance parameter
-confInv(ynew, Xnew, lambda) 
+```
 
+### Find 2d test statistics matrix
+There is also a function to find test statistics matrix for $(h^2, \sigma_p^2)^T$ in a predefined grid, the default grid range is from 0 to 1 for both $h^2$ and $\sigma_p^2$. The output of this function is a matrix containing the different test statistics at each grid combination.
+```{r message=FALSE}
 # matrix of test statistics at a grid of h2 from 0 to 1 and sigma^2_p from 0.0001 to 3.
-cr <- confReg(range_p = c(1e-4,3), ynew, Xnew, lambda) 
+cr <- confReg(range_p = c(1e-4,3), ynew, Xnew, lambda)  
 library(ggplot2)
 library(dplyr)
 library(latex2exp)
 data.frame(p = seq(1e-4,3, length.out = 200)[30:150], teststatistic = cr[100,30:150]) %>%
-  ggplot(aes(x = p, y = teststatistic))  + theme_bw() + #geom_point(size=0.8) +
+  ggplot(aes(x = p, y = teststatistic))  + theme_bw() + 
   geom_line() + xlab(TeX("$sigma^2_p$")) + ylab("Test-statistic") +
   ggtitle(TeX("$h^2=0.5$")) + theme(plot.title = element_text(hjust = 0.5)) +
   geom_hline(yintercept=qchisq(0.95, 1), color = "red")+
   theme(axis.title=element_text(size=16), 
         plot.title = element_text(size = 18), axis.text = element_text(size=12))
+```
+
+### Find confidence interval for variance ratio using RLRT method
+This function gives confidence interval for $\tau = \sigma^2_g / \sigma^2_e$ based on RLRT method (@crainiceanu2004likelihood). First we need to find simulated distribution of RLRT statistic using RLRTSim.
+The input of RLRTSim is
+  -  $\texttt{X}$: An n-by-p matrix of predictors, n > p.
+  -  $\texttt{Ksqrt}$: A matrix which is the square root of the variance component covariance matrix.
+  -  $\texttt{tau0}$: A positive scalar indicates the value at which we want to make the hypothesis test.
+The output of RLRTSim is 
+  -  A vector with the length of number of simulation.
+
+Then we can construct confidence interval with the simulated distribution, eigen values from matrix of variance component and transformed X, y. Output would be a vector of length 2 with endpoints of the confidence interval.
+```{r}
+ciseq <- seq(from = 0, to = 5, length.out = 200)         # sequence of values that want to be checked for sigma^2g / sigma^e
+SimDists <- list()
+Ksqrt <- V %*% diag(lambda^0.5) %*% t(V)                 # find sqrt of K
+for (j in 1:length(ciseq)) {
+  SimDists[[j]] <- RLRTSim(X, Ksqrt, tau0 = ciseq[j])
+}
+RLRTCI(SimDists=SimDists, ciseq=ciseq, Xnew=Xnew, ynew=ynew, eigens=lambda)
 ```
 

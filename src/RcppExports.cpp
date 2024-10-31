@@ -12,8 +12,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // RLRsimCpp
-List RLRsimCpp(int p, int m, int n, int nsim, int gridlength, Rcpp::NumericVector mu, Rcpp::NumericVector lambdaGrid, double lambda0);
-RcppExport SEXP _lmmvar_RLRsimCpp(SEXP pSEXP, SEXP mSEXP, SEXP nSEXP, SEXP nsimSEXP, SEXP gridlengthSEXP, SEXP muSEXP, SEXP lambdaGridSEXP, SEXP lambda0SEXP) {
+Rcpp::NumericVector RLRsimCpp(int p, int m, int n, int nsim, Rcpp::NumericVector mu, Rcpp::NumericVector tauGrid, double tau0);
+RcppExport SEXP _lmmvar_RLRsimCpp(SEXP pSEXP, SEXP mSEXP, SEXP nSEXP, SEXP nsimSEXP, SEXP muSEXP, SEXP tauGridSEXP, SEXP tau0SEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -21,11 +21,10 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< int >::type m(mSEXP);
     Rcpp::traits::input_parameter< int >::type n(nSEXP);
     Rcpp::traits::input_parameter< int >::type nsim(nsimSEXP);
-    Rcpp::traits::input_parameter< int >::type gridlength(gridlengthSEXP);
     Rcpp::traits::input_parameter< Rcpp::NumericVector >::type mu(muSEXP);
-    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type lambdaGrid(lambdaGridSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda0(lambda0SEXP);
-    rcpp_result_gen = Rcpp::wrap(RLRsimCpp(p, m, n, nsim, gridlength, mu, lambdaGrid, lambda0));
+    Rcpp::traits::input_parameter< Rcpp::NumericVector >::type tauGrid(tauGridSEXP);
+    Rcpp::traits::input_parameter< double >::type tau0(tau0SEXP);
+    rcpp_result_gen = Rcpp::wrap(RLRsimCpp(p, m, n, nsim, mu, tauGrid, tau0));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -95,7 +94,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_lmmvar_RLRsimCpp", (DL_FUNC) &_lmmvar_RLRsimCpp, 8},
+    {"_lmmvar_RLRsimCpp", (DL_FUNC) &_lmmvar_RLRsimCpp, 7},
     {"_lmmvar_varRatioTest1d", (DL_FUNC) &_lmmvar_varRatioTest1d, 5},
     {"_lmmvar_varRatioTest2d", (DL_FUNC) &_lmmvar_varRatioTest2d, 5},
     {"_lmmvar_confInv", (DL_FUNC) &_lmmvar_confInv, 8},

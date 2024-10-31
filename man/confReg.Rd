@@ -14,7 +14,7 @@ confReg(
 )
 }
 \arguments{
-\item{y}{A vector of length n of observed responses.}
+\item{y}{A vector of length n of observed responses with diagonal covariance matrix.}
 
 \item{X}{An n-by-p matrix of predictors, n > p.}
 
