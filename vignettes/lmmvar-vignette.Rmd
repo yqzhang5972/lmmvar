@@ -163,22 +163,24 @@ contour(x = s2p_vals, y = h2_vals, z = cr,
 ```
 
 ### Confidence interval using the restricted likelihood ratio
-This function gives confidence interval for $\tau = \sigma^2_g / \sigma^2_e$ based
-on RLRT method (@crainiceanu2004likelihood). First we need to find simulated
-distribution of RLRT statistic using simulate_RLRT. The input of simulate_RLRT is
+To get a confidence inerval for $\tau = \sigma^2_g / \sigma^2_e$ based
+on the restricted likelihood ratio test (@crainiceanu2004likelihood),
+we need to be able to simulate from the distribution of the test-statistic under
+any null hypothesis. The input of `simulate_RLRT` is
 
   -  `X`: An n-by-p matrix of predictors, n > p.
   -  `Ksqrt`: A matrix which is the square root of the variance component
       covariance matrix.
-  -  `tau0`: A positive scalar indicates the value at which we want to make the
-      hypothesis test.
+  -  `tau0`: A positive scalar with the null hypothesis
   
-The output of simulate_RLRT is 
+The output of `simulate_RLRT` is 
 
-  -  A vector with the length of number of simulation.
+  -  A vector with simulated values of the test-statistic.
 
-To create a confidence interval, we need to simulate from the distribution
-of the test-statistic, for every potential value of the parameter of interest.
+The following code simulates test-statistics, for every potential value of the
+parameter of interest, and then uses the simulation output to
+create a confidence interval. The latter is done using `RLRTCI`.
+
 We have set the `nsim` and `length.out` arguments somewhat low to decrease
 computing time; in practice one can increase these to increase precision.
 ```{r}
@@ -197,4 +199,6 @@ tau_int
 # Corresponding interval for h2
 tau_int / (1 + tau_int)
 ```
+
+## References
 
