@@ -33,12 +33,14 @@ library(lmmvar)
 ## Setting
 Suppose a vector of response $y \in \mathbb{R}^n$, a design matrix $X\in\mathbb{R}^{n\times p}$, a random effect matrix $Z \in \mathbb{R}^{n\times m}$, for some $\beta \in \mathbb{R}^p$, satisfy
 $$
-y = X\beta + Zu + e
-$$,
-where $u_{m\times1} \sim N(0, \sigma_g^2/m)$ and $e_{n\times1} \sim N(0, \sigma_e^2I_n)$ are independent. Let $K = ZZ^T/m$ (kinship matrix), $h^2 = \sigma_g^2 / (\sigma_g^2+\sigma_e^2)$ (heritability) and $\sigma_p^2 = \sigma_g^2+\sigma_e^2$, it then follows that
+y = X\beta + Zu + e,
 $$
-y \sim N(X\beta, \sigma_p^2(h^2K+(1-h^2)I_n))
-$$.
+where $u_{m\times1} \sim N(0, \sigma_g^2/m)$ and $e_{n\times1} \sim N(0, \sigma_e^2I_n)$ are independent. 
+
+Now if we let $K = ZZ^T/m$ (kinship matrix), $h^2 = \sigma_g^2 / (\sigma_g^2+\sigma_e^2)$ (heritability) and $\sigma_p^2 = \sigma_g^2+\sigma_e^2$, it then follows that
+$$
+y \sim N(X\beta, \sigma_p^2(h^2K+(1-h^2)I_n)).
+$$
 
 ## Main functions
 There are four main functions in the R package. They are 
@@ -55,8 +57,8 @@ We also provide functions based on restricted likelihood ratio test method (@cra
 
 
 ## Example
-### Data set up
-Let's look at an example based on simulation data. 
+### Set up
+Let's look at an simulation example. We set the true $h^2$ to be 0.5 and $\sigma_p^2$ to be 1, and dimension of $n,p,m$ are 100,10,1000 respectively. 
 ```{r}
 # -----------------------------------------   
 # function to simulate y = X\beta + Zu + e
@@ -88,7 +90,6 @@ simZ <- function(m,n) {
 # -----------------------------------   
 # hyperparameters and data simulation
 # ----------------------------------- 
-N = 10000 
 n=100   
 p=10
 m=1000
@@ -141,29 +142,24 @@ varRatioTest2d(h2, s2p, ynew, Xnew, lambda)
 ```
 
 ### Find 2d test statistics matrix
-There is also a function to find test statistics matrix for $(h^2, \sigma_p^2)^T$ in a predefined grid, the default grid range is from 0 to 1 for both $h^2$ and $\sigma_p^2$. The output of this function is a matrix containing the different test statistics at each grid combination.
+There is also a function to find test statistics matrix for $(h^2, \sigma_p^2)^T$ in a pre-defined grid, the default grid range is from 0 to 1 for both $h^2$ and $\sigma_p^2$. The output of this function is a matrix containing the different test statistics at each grid combination.
 ```{r message=FALSE}
 # matrix of test statistics at a grid of h2 from 0 to 1 and sigma^2_p from 0.0001 to 3.
 cr <- confReg(range_p = c(1e-4,3), ynew, Xnew, lambda)  
-library(ggplot2)
-library(dplyr)
-library(latex2exp)
-data.frame(p = seq(1e-4,3, length.out = 200)[30:150], teststatistic = cr[100,30:150]) %>%
-  ggplot(aes(x = p, y = teststatistic))  + theme_bw() + 
-  geom_line() + xlab(TeX("$sigma^2_p$")) + ylab("Test-statistic") +
-  ggtitle(TeX("$h^2=0.5$")) + theme(plot.title = element_text(hjust = 0.5)) +
-  geom_hline(yintercept=qchisq(0.95, 1), color = "red")+
-  theme(axis.title=element_text(size=16), 
-        plot.title = element_text(size = 18), axis.text = element_text(size=12))
+dim(cr)
+cr[100,50]
 ```
 
 ### Find confidence interval for variance ratio using RLRT method
 This function gives confidence interval for $\tau = \sigma^2_g / \sigma^2_e$ based on RLRT method (@crainiceanu2004likelihood). First we need to find simulated distribution of RLRT statistic using RLRTSim.
 The input of RLRTSim is
+
   -  $\texttt{X}$: An n-by-p matrix of predictors, n > p.
   -  $\texttt{Ksqrt}$: A matrix which is the square root of the variance component covariance matrix.
   -  $\texttt{tau0}$: A positive scalar indicates the value at which we want to make the hypothesis test.
+  
 The output of RLRTSim is 
+
   -  A vector with the length of number of simulation.
 
 Then we can construct confidence interval with the simulated distribution, eigen values from matrix of variance component and transformed X, y. Output would be a vector of length 2 with endpoints of the confidence interval.
